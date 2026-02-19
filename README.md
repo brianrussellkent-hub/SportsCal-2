@@ -2,13 +2,13 @@
 
 A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript for Vercel.
 
-## Included coverage
+## Included coverage targets
 
-- NY Mets (expanded 2026 slate, home + away)
-- NY Giants (expanded 2026 slate, home + away)
+- NY Mets (all regular-season games, home + away via MLB API refresh)
+- NY Giants (full schedule, home + away via ESPN refresh)
 - UCI World Tour cycling
-  - includes individual stage entries for Giro d'Italia, Tour de France, and La Vuelta a España
-- Formula 1
+  - one-day events + stage-by-stage entries for all configured stage races
+- Formula 1 (via Ergast refresh)
 - NASCAR
 
 ## Key behavior
@@ -17,7 +17,7 @@ A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript fo
 - Monday-first calendar layout (Monday left, Sunday right).
 - Category-colored events (MLB/NFL/Cycling/F1/NASCAR).
 - **Today** button jumps directly to current ET day.
-- **Refresh schedules** button calls live source adapters (MLB Stats API + Ergast F1, with fallback to bundled data).
+- **Refresh schedules** checks all tracked sports sources/adapters and merges missing events into the calendar.
 - All times rendered in Eastern Time (`America/New_York`).
 - Only events with unconfirmed public start times are marked **Time TBD (ET)**.
 - Filter by category and team/series.

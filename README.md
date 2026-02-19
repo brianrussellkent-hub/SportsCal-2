@@ -4,7 +4,7 @@ A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript fo
 
 ## Included coverage
 
-- NY Mets (MLB)
+- NY Mets (expanded 2026 slate)
 - NY Giants (NFL)
 - UCI World Tour cycling
   - includes individual stage entries for Giro d'Italia, Tour de France, and La Vuelta a España
@@ -14,16 +14,17 @@ A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript fo
 ## Key behavior
 
 - Month / Week / Day viewing options.
+- Monday-first calendar layout (Monday on the far left, Sunday on the far right).
 - Dark calendar layout inspired by Google/Outlook density.
 - All times rendered in Eastern Time (`America/New_York`).
-- Events with unconfirmed public start times are marked **Time TBD (ET)**.
+- Only events with unconfirmed public start times are marked **Time TBD (ET)**.
 - Filter by category and team/series.
 - Daily ET reset of filter state at day rollover.
 
 ## Data quality notes
 
 - Event dates are curated from publicly available series calendars and organizer schedules.
-- Exact start times can change; unresolved or unpublished times are intentionally shown as TBD.
+- Exact times can change; unresolved or unpublished times are intentionally shown as TBD.
 
 ## Local development
 

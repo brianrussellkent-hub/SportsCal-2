@@ -72,10 +72,43 @@ button {
   font-size: 1.05rem;
 }
 
-.calendarGrid {
+.weekdayHeader {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.weekdayHeader span {
+  text-align: center;
+  color: #8ea0c7;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.monthGrid,
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.dayGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.monthBlank {
+  border: 1px dashed #2a3146;
+  border-radius: 12px;
+  min-height: 180px;
+  opacity: 0.45;
+}
+
+.monthCell .timeColumn,
+.weekGrid .timeColumn,
+.dayGrid .timeColumn {
+  height: 100%;
 }
 
 .timeColumn {
@@ -118,4 +151,20 @@ button {
   margin-top: 1rem;
   color: #8fa1c8;
   font-size: 0.85rem;
+}
+
+@media (max-width: 1200px) {
+  .monthGrid,
+  .weekGrid,
+  .weekdayHeader {
+    gap: 0.45rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .monthGrid,
+  .weekGrid,
+  .weekdayHeader {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

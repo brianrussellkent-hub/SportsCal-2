@@ -12,6 +12,7 @@ type ViewMode = "month" | "week" | "day";
 const TZ = "America/New_York";
 const allCategoriesOption = "All categories" as const;
 const allSeriesOption = "All teams/series" as const;
+const mondayFirstLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function formatDateTimeInEt(iso: string, isTimeTbd?: boolean): string {
   if (isTimeTbd) return "Time TBD (ET)";
@@ -57,6 +58,11 @@ function parseDateKey(dateKey: string): Date {
 
 function monthName(monthIndex: number): string {
   return new Date(2026, monthIndex, 1).toLocaleDateString("en-US", { month: "long" });
+}
+
+function mondayBasedWeekday(date: Date): number {
+  const jsDay = date.getDay();
+  return (jsDay + 6) % 7;
 }
 
 export function SportsCalendar({ events }: SportsCalendarProps) {
@@ -120,28 +126,32 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
 
   const weekDateKeys = useMemo(() => {
     const keys: string[] = [];
-    const sunday = new Date(selectedDate);
-    sunday.setDate(sunday.getDate() - sunday.getDay());
+    const monday = new Date(selectedDate);
+    monday.setDate(monday.getDate() - mondayBasedWeekday(monday));
     for (let i = 0; i < 7; i += 1) {
-      const d = new Date(sunday);
-      d.setDate(sunday.getDate() + i);
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
       keys.push(keyFromLocalDate(d));
     }
     return keys;
   }, [selectedDateKey]);
 
-  const monthDateKeys = useMemo(() => {
+  const monthDateCells = useMemo(() => {
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth();
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
-    const keys: string[] = [];
+    const daysInMonth = last.getDate();
+    const leadingPadding = mondayBasedWeekday(first);
+    const cells: Array<string | null> = [];
 
-    for (let day = first.getDate(); day <= last.getDate(); day += 1) {
-      keys.push(keyFromLocalDate(new Date(year, month, day)));
+    for (let i = 0; i < leadingPadding; i += 1) cells.push(null);
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      cells.push(keyFromLocalDate(new Date(year, month, day)));
     }
+    while (cells.length % 7 !== 0) cells.push(null);
 
-    return keys;
+    return cells;
   }, [selectedDateKey]);
 
   const jumpMonth = (direction: 1 | -1) => {
@@ -175,17 +185,13 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
     <main className="container darkCalendar">
       <header className="hero">
         <h1>SportsCal 2026</h1>
-        <p>Dark calendar with Month / Week / Day views and stage-by-stage grand tours.</p>
-        <small>All times shown in ET. Where official start times are unpublished, events are marked Time TBD.</small>
+        <p>Dark calendar with Month / Week / Day views and Monday-first week layout.</p>
+        <small>All times shown in ET. Only events with unpublished times are marked Time TBD.</small>
       </header>
 
       <section className="controls">
         <label htmlFor="view-select">View</label>
-        <select
-          id="view-select"
-          value={viewMode}
-          onChange={(event) => setViewMode(event.target.value as ViewMode)}
-        >
+        <select id="view-select" value={viewMode} onChange={(event) => setViewMode(event.target.value as ViewMode)}>
           <option value="month">Month</option>
           <option value="week">Week</option>
           <option value="day">Day</option>
@@ -218,11 +224,7 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
         </select>
 
         <label htmlFor="series-select">Team / Series</label>
-        <select
-          id="series-select"
-          value={selectedSeries}
-          onChange={(event) => setSelectedSeries(event.target.value)}
-        >
+        <select id="series-select" value={selectedSeries} onChange={(event) => setSelectedSeries(event.target.value)}>
           <option value={allSeriesOption}>{allSeriesOption}</option>
           {seriesList.map((series) => (
             <option key={series} value={series}>
@@ -241,13 +243,27 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
             </h2>
             <button onClick={() => jumpMonth(1)} type="button">Next month</button>
           </div>
-          <div className="calendarGrid">{monthDateKeys.map((dateKey) => renderDayColumn(dateKey))}</div>
+          <div className="weekdayHeader">{mondayFirstLabels.map((label) => <span key={label}>{label}</span>)}</div>
+          <div className="monthGrid">
+            {monthDateCells.map((dateKey, index) =>
+              dateKey ? (
+                <div key={dateKey} className="monthCell">{renderDayColumn(dateKey)}</div>
+              ) : (
+                <div key={`blank-${index}`} className="monthBlank" />
+              )
+            )}
+          </div>
         </section>
       )}
 
-      {viewMode === "week" && <section className="calendarGrid">{weekDateKeys.map(renderDayColumn)}</section>}
+      {viewMode === "week" && (
+        <section>
+          <div className="weekdayHeader">{mondayFirstLabels.map((label) => <span key={label}>{label}</span>)}</div>
+          <div className="weekGrid">{weekDateKeys.map(renderDayColumn)}</div>
+        </section>
+      )}
 
-      {viewMode === "day" && <section className="calendarGrid">{renderDayColumn(selectedDateKey)}</section>}
+      {viewMode === "day" && <section className="dayGrid">{renderDayColumn(selectedDateKey)}</section>}
 
       <footer className="footnote">Daily ET reset key: {etDateKey}</footer>
     </main>

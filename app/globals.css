@@ -14,19 +14,14 @@ body {
 }
 
 .container {
-  width: min(1400px, 96vw);
+  width: min(1500px, 96vw);
   margin: 0 auto;
   padding: 1.5rem 0 3rem;
-}
-
-.hero {
-  margin-bottom: 1rem;
 }
 
 .hero h1 {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
-  color: #f4f7ff;
 }
 
 .hero p {
@@ -41,7 +36,7 @@ body {
 .controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.6rem;
   align-items: center;
   background: #171b25;
   border: 1px solid #283044;
@@ -55,7 +50,9 @@ label {
   font-weight: 600;
 }
 
-select {
+select,
+input,
+button {
   border: 1px solid #394561;
   background: #101521;
   color: #eaf0ff;
@@ -63,65 +60,58 @@ select {
   padding: 0.45rem 0.65rem;
 }
 
-.yearGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 0.85rem;
+.subheader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
 }
 
-.monthCard {
+.subheader h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.65rem;
+}
+
+.timeColumn {
   background: #151a24;
   border: 1px solid #29334b;
   border-radius: 12px;
-  overflow: hidden;
+  padding: 0.5rem;
+  min-height: 180px;
 }
 
-.monthCard h2 {
-  margin: 0;
-  padding: 0.65rem 0.8rem;
-  border-bottom: 1px solid #29334b;
-  font-size: 1rem;
-  background: #1a2130;
-}
-
-.monthDays {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 1px;
-  background: #29334b;
-}
-
-.dayCell {
-  min-height: 82px;
-  background: #121722;
-  padding: 0.35rem;
-}
-
-.dayNumber {
-  font-size: 0.72rem;
-  color: #95a5c9;
-  margin-bottom: 0.2rem;
-}
-
-.dayEvents {
-  display: grid;
-  gap: 0.2rem;
+.timeColumn h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.9rem;
+  color: #aab9d8;
 }
 
 .eventPill {
   display: grid;
   gap: 0.1rem;
-  font-size: 0.66rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.76rem;
   line-height: 1.2;
   background: #204d7a;
   color: #dff0ff;
   border-radius: 6px;
-  padding: 0.22rem 0.3rem;
+  padding: 0.34rem 0.4rem;
 }
 
-.eventTime {
-  color: #9ecfff;
-  font-weight: 600;
+.eventPill strong {
+  font-size: 0.78rem;
+}
+
+.emptyCell {
+  margin: 0;
+  color: #7f91b8;
+  font-size: 0.8rem;
 }
 
 .footnote {

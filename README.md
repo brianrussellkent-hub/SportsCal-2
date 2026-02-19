@@ -1,23 +1,29 @@
 # SportsCal 2
 
-A dark-mode, full-year 2026 sports calendar built with Next.js (App Router) + TypeScript for Vercel.
+A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript for Vercel.
 
 ## Included coverage
 
 - NY Mets (MLB)
 - NY Giants (NFL)
-- UCI World Tour cycling (expanded 2026 calendar)
+- UCI World Tour cycling
+  - includes individual stage entries for Giro d'Italia, Tour de France, and La Vuelta a España
 - Formula 1
 - NASCAR
 
 ## Key behavior
 
-- **Google/Outlook-inspired month-grid calendar layout**.
-- **Dark mode UI** optimized for dense event viewing.
-- **All times rendered in Eastern Time (`America/New_York`)**.
-- **Filter by category and team/series**.
-- **Daily ET reset** of filter state at day rollover.
-- Data model is extensible in `data/events.ts` for adding teams/sports/events.
+- Month / Week / Day viewing options.
+- Dark calendar layout inspired by Google/Outlook density.
+- All times rendered in Eastern Time (`America/New_York`).
+- Events with unconfirmed public start times are marked **Time TBD (ET)**.
+- Filter by category and team/series.
+- Daily ET reset of filter state at day rollover.
+
+## Data quality notes
+
+- Event dates are curated from publicly available series calendars and organizer schedules.
+- Exact start times can change; unresolved or unpublished times are intentionally shown as TBD.
 
 ## Local development
 

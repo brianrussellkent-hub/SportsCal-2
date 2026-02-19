@@ -1,121 +1,32 @@
-:root {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background: #0f1117;
-  color: #e6eaf2;
-}
-
-.container {
-  width: min(1500px, 96vw);
-  margin: 0 auto;
-  padding: 1.5rem 0 3rem;
-}
-
-.hero h1 {
-  margin: 0;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-}
-
-.hero p {
-  margin: 0.4rem 0;
-  color: #b0bdd7;
-}
-
-.hero small {
-  color: #90a0c0;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: center;
-  background: #171b25;
-  border: 1px solid #283044;
-  border-radius: 12px;
-  padding: 0.8rem;
-  margin: 1rem 0 1.2rem;
-}
-
-label {
-  color: #c2cee6;
-  font-weight: 600;
-}
-
-select,
-input,
-button {
-  border: 1px solid #394561;
-  background: #101521;
-  color: #eaf0ff;
-  border-radius: 10px;
-  padding: 0.45rem 0.65rem;
-}
-
-.subheader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.65rem;
-}
-
-.subheader h2 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.calendarGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.65rem;
-}
-
-.timeColumn {
-  background: #151a24;
-  border: 1px solid #29334b;
-  border-radius: 12px;
-  padding: 0.5rem;
-  min-height: 180px;
-}
-
-.timeColumn h3 {
-  margin: 0 0 0.45rem;
-  font-size: 0.9rem;
-  color: #aab9d8;
-}
-
-.eventPill {
-  display: grid;
-  gap: 0.1rem;
-  margin-bottom: 0.3rem;
-  font-size: 0.76rem;
-  line-height: 1.2;
-  background: #204d7a;
-  color: #dff0ff;
-  border-radius: 6px;
-  padding: 0.34rem 0.4rem;
-}
-
-.eventPill strong {
-  font-size: 0.78rem;
-}
-
-.emptyCell {
-  margin: 0;
-  color: #7f91b8;
-  font-size: 0.8rem;
-}
-
-.footnote {
-  margin-top: 1rem;
-  color: #8fa1c8;
-  font-size: 0.85rem;
-}
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: #0f1117; color: #e6eaf2; }
+.container { width: min(1500px, 96vw); margin: 0 auto; padding: 1.5rem 0 3rem; }
+.hero h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.hero p { margin: 0.4rem 0; color: #b0bdd7; }
+.hero small { color: #90a0c0; }
+.controls { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; background: #171b25; border: 1px solid #283044; border-radius: 12px; padding: 0.8rem; margin: 1rem 0 0.6rem; }
+label { color: #c2cee6; font-weight: 600; }
+select,input,button { border: 1px solid #394561; background: #101521; color: #eaf0ff; border-radius: 10px; padding: 0.45rem 0.65rem; }
+.refreshStatus { margin: 0 0 0.8rem; color: #9bc1ff; font-size: 0.82rem; }
+.subheader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; }
+.subheader h2 { margin: 0; font-size: 1.05rem; }
+.weekdayHeader { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.65rem; margin-bottom: 0.45rem; }
+.weekdayHeader span { text-align: center; color: #8ea0c7; font-size: 0.8rem; font-weight: 600; }
+.monthGrid,.weekGrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.65rem; }
+.dayGrid { display: grid; grid-template-columns: 1fr; }
+.monthBlank { border: 1px dashed #2a3146; border-radius: 12px; min-height: 180px; opacity: 0.45; }
+.monthCell .timeColumn,.weekGrid .timeColumn,.dayGrid .timeColumn { height: 100%; }
+.timeColumn { background: #151a24; border: 1px solid #29334b; border-radius: 12px; padding: 0.5rem; min-height: 180px; }
+.timeColumn h3 { margin: 0 0 0.45rem; font-size: 0.9rem; color: #aab9d8; }
+.eventPill { display: grid; gap: 0.1rem; margin-bottom: 0.3rem; font-size: 0.76rem; line-height: 1.2; border-radius: 6px; padding: 0.34rem 0.4rem; color: #f4f8ff; }
+.eventPill strong { font-size: 0.78rem; }
+.event-mlb { background: #1f4e79; }
+.event-nfl { background: #5a2d82; }
+.event-cycling { background: #3f6b1f; }
+.event-formula-1 { background: #8a2a2a; }
+.event-nascar { background: #6b4a1f; }
+.emptyCell { margin: 0; color: #7f91b8; font-size: 0.8rem; }
+.footnote { margin-top: 1rem; color: #8fa1c8; font-size: 0.85rem; }
+@media (max-width: 1200px) { .monthGrid,.weekGrid,.weekdayHeader { gap: 0.45rem; } }
+@media (max-width: 900px) { .monthGrid,.weekGrid,.weekdayHeader { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

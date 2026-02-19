@@ -10,26 +10,55 @@ type SportsCalendarProps = {
 const TZ = "America/New_York";
 const allCategoriesOption = "All categories" as const;
 const allSeriesOption = "All teams/series" as const;
+const year = 2026;
 
-function formatDateTimeInEst(iso: string): string {
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+
+function formatDateTimeInEt(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
     timeZone: TZ,
-    weekday: "short",
-    month: "short",
-    day: "numeric",
     hour: "numeric",
     minute: "2-digit",
     timeZoneName: "short"
   }).format(new Date(iso));
 }
 
-function getCurrentEstDateKey(): string {
+function getDateKeyInEt(iso: string): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: TZ,
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
-  }).format(new Date());
+  }).format(new Date(iso));
+}
+
+function getCurrentEtDateKey(): string {
+  return getDateKeyInEt(new Date().toISOString());
+}
+
+function buildMonthDays(targetYear: number, monthIndex: number): Date[] {
+  const count = new Date(targetYear, monthIndex + 1, 0).getDate();
+  return Array.from({ length: count }, (_, i) => new Date(targetYear, monthIndex, i + 1));
+}
+
+function buildEtDateKeyFromLocalDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = `${date.getMonth() + 1}`.padStart(2, "0");
+  const d = `${date.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export function SportsCalendar({ events }: SportsCalendarProps) {
@@ -39,12 +68,12 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
   const [selectedSeries, setSelectedSeries] = useState<typeof allSeriesOption | string>(
     allSeriesOption
   );
-  const [estDateKey, setEstDateKey] = useState<string>(() => getCurrentEstDateKey());
+  const [etDateKey, setEtDateKey] = useState<string>(() => getCurrentEtDateKey());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const current = getCurrentEstDateKey();
-      setEstDateKey((previous) => {
+      const current = getCurrentEtDateKey();
+      setEtDateKey((previous) => {
         if (previous !== current) {
           setSelectedCategory(allCategoriesOption);
           setSelectedSeries(allSeriesOption);
@@ -74,21 +103,27 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
       )
       .filter((event) =>
         selectedSeries === allSeriesOption ? true : event.teamOrSeries === selectedSeries
-      )
-      .sort(
-        (a, b) =>
-          new Date(a.startTimeIso).getTime() - new Date(b.startTimeIso).getTime()
       );
   }, [events, selectedCategory, selectedSeries]);
 
+  const eventsByDate = useMemo(() => {
+    return filteredEvents.reduce<Record<string, SportsEvent[]>>((acc, event) => {
+      const key = getDateKeyInEt(event.startTimeIso);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(event);
+      acc[key].sort(
+        (a, b) => new Date(a.startTimeIso).getTime() - new Date(b.startTimeIso).getTime()
+      );
+      return acc;
+    }, {});
+  }, [filteredEvents]);
+
   return (
-    <main className="container">
+    <main className="container darkCalendar">
       <header className="hero">
-        <h1>SportsCal</h1>
-        <p>
-          NY Mets, NY Giants, UCI World Tour, Formula 1, and NASCAR schedule tracker.
-        </p>
-        <small>All times shown in Eastern Time (ET).</small>
+        <h1>SportsCal 2026</h1>
+        <p>Google/Outlook-style dark calendar for NY teams, motorsports, and UCI World Tour.</p>
+        <small>All event times shown in Eastern Time (ET). Filters auto-reset daily at ET midnight.</small>
       </header>
 
       <section className="controls">
@@ -123,28 +158,37 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
         </select>
       </section>
 
-      <section>
-        <ul className="eventList">
-          {filteredEvents.map((event) => (
-            <li key={event.id} className="eventCard">
-              <div className="eventTop">
-                <span className="sportBadge">{event.category}</span>
-                <time dateTime={event.startTimeIso}>{formatDateTimeInEst(event.startTimeIso)}</time>
+      <section className="yearGrid">
+        {monthNames.map((monthName, monthIndex) => {
+          const days = buildMonthDays(year, monthIndex);
+          return (
+            <article key={monthName} className="monthCard">
+              <h2>{monthName}</h2>
+              <div className="monthDays">
+                {days.map((date) => {
+                  const key = buildEtDateKeyFromLocalDate(date);
+                  const dayEvents = eventsByDate[key] ?? [];
+                  return (
+                    <div key={key} className="dayCell">
+                      <div className="dayNumber">{date.getDate()}</div>
+                      <div className="dayEvents">
+                        {dayEvents.map((event) => (
+                          <div key={event.id} className="eventPill" title={event.location}>
+                            <span className="eventTime">{formatDateTimeInEt(event.startTimeIso)}</span>
+                            <span>{event.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <h2>{event.title}</h2>
-              <p>{event.location}</p>
-              <small>{event.teamOrSeries}</small>
-            </li>
-          ))}
-        </ul>
-        {filteredEvents.length === 0 && (
-          <p className="emptyState">No events match your current filters.</p>
-        )}
+            </article>
+          );
+        })}
       </section>
 
-      <footer className="footnote">
-        Calendar state auto-resets daily (ET) for schedule updates. Date key: {estDateKey}
-      </footer>
+      <footer className="footnote">Daily ET reset key: {etDateKey}</footer>
     </main>
   );
 }

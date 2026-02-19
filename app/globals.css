@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 * {
@@ -8,107 +8,124 @@
 
 body {
   margin: 0;
-  font-family: Inter, Arial, Helvetica, sans-serif;
-  background: #f4f6fb;
-  color: #101423;
+  font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: #0f1117;
+  color: #e6eaf2;
 }
 
 .container {
-  width: min(980px, 92vw);
+  width: min(1400px, 96vw);
   margin: 0 auto;
-  padding: 2.5rem 0 4rem;
+  padding: 1.5rem 0 3rem;
+}
+
+.hero {
+  margin-bottom: 1rem;
 }
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: #f4f7ff;
 }
 
 .hero p {
-  color: #4e5570;
-  margin-top: 0.5rem;
-  margin-bottom: 0.25rem;
+  margin: 0.4rem 0;
+  color: #b0bdd7;
 }
 
 .hero small {
-  color: #525b7c;
+  color: #90a0c0;
 }
 
 .controls {
-  margin: 1.5rem 0;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  background: #171b25;
+  border: 1px solid #283044;
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin: 1rem 0 1.2rem;
 }
 
 label {
+  color: #c2cee6;
   font-weight: 600;
 }
 
 select {
-  border: 1px solid #cfd7ea;
+  border: 1px solid #394561;
+  background: #101521;
+  color: #eaf0ff;
   border-radius: 10px;
-  padding: 0.5rem 0.75rem;
-  background: white;
+  padding: 0.45rem 0.65rem;
 }
 
-.eventList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.yearGrid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 0.85rem;
 }
 
-.eventCard {
-  background: #fff;
-  border: 1px solid #dde3f2;
-  border-radius: 14px;
-  padding: 1rem;
-  box-shadow: 0 8px 18px rgba(21, 34, 65, 0.06);
+.monthCard {
+  background: #151a24;
+  border: 1px solid #29334b;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.eventTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.95rem;
-  color: #3f4662;
-  gap: 1rem;
+.monthCard h2 {
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid #29334b;
+  font-size: 1rem;
+  background: #1a2130;
 }
 
-.sportBadge {
-  background: #edf2ff;
-  color: #334fbe;
-  border-radius: 999px;
-  padding: 0.2rem 0.55rem;
+.monthDays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: #29334b;
+}
+
+.dayCell {
+  min-height: 82px;
+  background: #121722;
+  padding: 0.35rem;
+}
+
+.dayNumber {
+  font-size: 0.72rem;
+  color: #95a5c9;
+  margin-bottom: 0.2rem;
+}
+
+.dayEvents {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.eventPill {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  background: #204d7a;
+  color: #dff0ff;
+  border-radius: 6px;
+  padding: 0.22rem 0.3rem;
+}
+
+.eventTime {
+  color: #9ecfff;
   font-weight: 600;
 }
 
-.eventCard h2 {
-  margin: 0.7rem 0 0.3rem;
-  font-size: 1.15rem;
-}
-
-.eventCard p {
-  margin: 0;
-  color: #525b7c;
-}
-
-.eventCard small {
-  display: block;
-  margin-top: 0.45rem;
-  color: #5e688f;
-}
-
-.emptyState {
-  margin-top: 1rem;
-  color: #4e5570;
-}
-
 .footnote {
-  margin-top: 1.25rem;
-  color: #5a6284;
-  font-size: 0.9rem;
+  margin-top: 1rem;
+  color: #8fa1c8;
+  font-size: 0.85rem;
 }

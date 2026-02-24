@@ -135,7 +135,8 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
 
   const weekDateKeys = useMemo(() => {
     const keys: string[] = [];
-    const monday = new Date(selectedDate);
+    const selected = parseDateKey(selectedDateKey);
+    const monday = new Date(selected);
     monday.setDate(monday.getDate() - mondayBasedWeekday(monday));
     for (let i = 0; i < 7; i += 1) {
       const d = new Date(monday);
@@ -146,8 +147,9 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
   }, [selectedDateKey]);
 
   const monthDateCells = useMemo(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
+    const selected = parseDateKey(selectedDateKey);
+    const year = selected.getFullYear();
+    const month = selected.getMonth();
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
     const leadingPadding = mondayBasedWeekday(first);

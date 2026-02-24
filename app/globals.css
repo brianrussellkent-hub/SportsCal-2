@@ -5,6 +5,27 @@ body { margin: 0; font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-s
 .hero h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); }
 .hero p { margin: 0.4rem 0; color: #b0bdd7; }
 .hero small { color: #90a0c0; }
+
+.quickLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+
+.quickLinks a {
+  border: 1px solid #394561;
+  background: #101521;
+  color: #9bc1ff;
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  text-decoration: none;
+  font-size: 0.82rem;
+}
+
+.quickLinks a:hover {
+  background: #162036;
+}
 .controls { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; background: #171b25; border: 1px solid #283044; border-radius: 12px; padding: 0.8rem; margin: 1rem 0 0.6rem; }
 label { color: #c2cee6; font-weight: 600; }
 select,input,button { border: 1px solid #394561; background: #101521; color: #eaf0ff; border-radius: 10px; padding: 0.45rem 0.65rem; }

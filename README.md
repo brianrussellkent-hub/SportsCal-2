@@ -18,6 +18,7 @@ A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript fo
 - Category-colored events (MLB/NFL/Cycling/F1/NASCAR).
 - **Today** button jumps directly to current ET day.
 - **Refresh schedules** checks all tracked sports sources/adapters and merges missing events into the calendar.
+- Main page includes quick links to FloBikes, HBO Max Sports, Peacock Cycling, Mets schedule, F1 schedule, and NASCAR schedule pages.
 - All times rendered in Eastern Time (`America/New_York`).
 - Only events with unconfirmed public start times are marked **Time TBD (ET)**.
 - Filter by category and team/series.

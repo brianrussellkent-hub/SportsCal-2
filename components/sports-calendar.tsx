@@ -213,6 +213,15 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
         <small>All times shown in ET. Only events with unpublished times are marked Time TBD.</small>
       </header>
 
+      <section className="quickLinks" aria-label="Sports schedule and streaming links">
+        <a href="https://www.flobikes.com/watch" target="_blank" rel="noreferrer">FloBikes</a>
+        <a href="https://play.hbomax.com/sports" target="_blank" rel="noreferrer">HBO Max Sports</a>
+        <a href="https://www.peacocktv.com/watch/sports-icon-tile-cycling" target="_blank" rel="noreferrer">Peacock Cycling</a>
+        <a href="https://www.mlb.com/mets/schedule/2026-02" target="_blank" rel="noreferrer">Mets 2026 Schedule</a>
+        <a href="https://www.formula1.com/en/racing/2026" target="_blank" rel="noreferrer">F1 2026 Schedule</a>
+        <a href="https://www.nascar.com/nascar-cup-series/2026/schedule/" target="_blank" rel="noreferrer">NASCAR 2026 Schedule</a>
+      </section>
+
       <section className="controls">
         <button type="button" onClick={handleToday}>Today</button>
         <button type="button" onClick={handleRefresh} disabled={isRefreshing}>

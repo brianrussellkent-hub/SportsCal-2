@@ -60,6 +60,7 @@ function createStageRaceStages(config: StageRaceConfig): SportsEvent[] {
 
 const uciOneDayEvents2026: SportsEvent[] = [
   ["2026-01-25", "Cadel Evans Great Ocean Road Race", "Geelong, Australia"],
+  ["2026-02-28", "Omloop Nieuwsblad", "Belgium"],
   ["2026-03-07", "Strade Bianche", "Siena, Italy"],
   ["2026-03-21", "Milano-Sanremo", "Italy"],
   ["2026-03-25", "Classic Brugge-De Panne", "Belgium"],

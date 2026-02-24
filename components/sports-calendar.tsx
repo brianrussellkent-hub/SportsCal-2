@@ -64,11 +64,8 @@ function monthName(monthIndex: number): string {
 }
 
 function mondayBasedWeekday(date: Date): number {
-  return (date.getDay() + 6) % 7;
-}
-
-function categoryClass(category: string): string {
-  return `event-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const jsDay = date.getDay();
+  return (jsDay + 6) % 7;
 }
 
 export function SportsCalendar({ events }: SportsCalendarProps) {
@@ -150,14 +147,16 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
     const month = selectedDate.getMonth();
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
+    const daysInMonth = last.getDate();
     const leadingPadding = mondayBasedWeekday(first);
     const cells: Array<string | null> = [];
 
     for (let i = 0; i < leadingPadding; i += 1) cells.push(null);
-    for (let day = 1; day <= last.getDate(); day += 1) {
+    for (let day = 1; day <= daysInMonth; day += 1) {
       cells.push(keyFromLocalDate(new Date(year, month, day)));
     }
     while (cells.length % 7 !== 0) cells.push(null);
+
     return cells;
   }, [selectedDateKey]);
 
@@ -266,7 +265,11 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
           <div className="weekdayHeader">{mondayFirstLabels.map((label) => <span key={label}>{label}</span>)}</div>
           <div className="monthGrid">
             {monthDateCells.map((dateKey, index) =>
-              dateKey ? <div key={dateKey} className="monthCell">{renderDayColumn(dateKey)}</div> : <div key={`blank-${index}`} className="monthBlank" />
+              dateKey ? (
+                <div key={dateKey} className="monthCell">{renderDayColumn(dateKey)}</div>
+              ) : (
+                <div key={`blank-${index}`} className="monthBlank" />
+              )
             )}
           </div>
         </section>

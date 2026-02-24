@@ -58,8 +58,7 @@ function createStageRaceStages(config: StageRaceConfig): SportsEvent[] {
   return stages;
 }
 
-const uciEvents2026: SportsEvent[] = [
-  ["2026-01-20", "Santos Tour Down Under", "Adelaide, Australia"],
+const uciOneDayEvents2026: SportsEvent[] = [
   ["2026-01-25", "Cadel Evans Great Ocean Road Race", "Geelong, Australia"],
   ["2026-02-28", "Omloop Nieuwsblad", "Belgium"],
   ["2026-03-07", "Strade Bianche", "Siena, Italy"],
@@ -74,8 +73,6 @@ const uciEvents2026: SportsEvent[] = [
   ["2026-04-22", "La Fleche Wallonne", "Belgium"],
   ["2026-04-26", "Liege-Bastogne-Liege", "Belgium"],
   ["2026-05-01", "Eschborn-Frankfurt", "Germany"],
-  ["2026-06-07", "Criterium du Dauphine", "France"],
-  ["2026-06-14", "Tour de Suisse", "Switzerland"],
   ["2026-08-01", "Donostia San Sebastian Klasikoa", "Spain"],
   ["2026-08-16", "BEMER Cyclassics", "Hamburg, Germany"],
   ["2026-09-11", "Grand Prix Cycliste de Quebec", "Quebec, Canada"],
@@ -135,63 +132,54 @@ const motorsport2026: SportsEvent[] = [
   startTimeIso: event[1]
 }));
 
-const nyTeams2026: SportsEvent[] = [
-  ["mets-1", "2026-03-30T20:10:00Z", "NY Mets vs Nationals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-2", "2026-03-31T20:10:00Z", "NY Mets vs Nationals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-3", "2026-04-01T17:10:00Z", "NY Mets vs Nationals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-4", "2026-04-10T23:10:00Z", "NY Mets vs Marlins", "Citi Field", "MLB", "NY Mets"],
-  ["mets-5", "2026-04-11T20:10:00Z", "NY Mets vs Marlins", "Citi Field", "MLB", "NY Mets"],
-  ["mets-6", "2026-04-12T17:40:00Z", "NY Mets vs Marlins", "Citi Field", "MLB", "NY Mets"],
-  ["mets-7", "2026-04-24T23:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-8", "2026-04-25T20:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-9", "2026-04-26T17:40:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-10", "2026-05-08T23:10:00Z", "NY Mets vs Cardinals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-11", "2026-05-09T20:10:00Z", "NY Mets vs Cardinals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-12", "2026-05-10T17:40:00Z", "NY Mets vs Cardinals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-13", "2026-05-22T23:10:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-14", "2026-05-23T20:10:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-15", "2026-05-24T17:40:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-16", "2026-06-05T23:10:00Z", "NY Mets vs Cubs", "Citi Field", "MLB", "NY Mets"],
-  ["mets-17", "2026-06-06T20:10:00Z", "NY Mets vs Cubs", "Citi Field", "MLB", "NY Mets"],
-  ["mets-18", "2026-06-07T17:40:00Z", "NY Mets vs Cubs", "Citi Field", "MLB", "NY Mets"],
-  ["mets-19", "2026-06-18T17:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-20", "2026-06-19T23:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-21", "2026-06-20T20:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-22", "2026-07-03T23:10:00Z", "NY Mets vs Yankees", "Citi Field", "MLB", "NY Mets"],
-  ["mets-23", "2026-07-04T17:10:00Z", "NY Mets vs Yankees", "Citi Field", "MLB", "NY Mets"],
-  ["mets-24", "2026-07-05T17:40:00Z", "NY Mets vs Yankees", "Citi Field", "MLB", "NY Mets"],
-  ["mets-25", "2026-07-17T23:10:00Z", "NY Mets vs Nationals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-26", "2026-07-18T20:10:00Z", "NY Mets vs Nationals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-27", "2026-07-19T17:40:00Z", "NY Mets vs Nationals", "Citi Field", "MLB", "NY Mets"],
-  ["mets-28", "2026-08-07T23:10:00Z", "NY Mets vs Dodgers", "Citi Field", "MLB", "NY Mets"],
-  ["mets-29", "2026-08-08T20:10:00Z", "NY Mets vs Dodgers", "Citi Field", "MLB", "NY Mets"],
-  ["mets-30", "2026-08-09T17:40:00Z", "NY Mets vs Dodgers", "Citi Field", "MLB", "NY Mets"],
-  ["mets-31", "2026-08-14T23:10:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-32", "2026-08-15T20:10:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-33", "2026-08-16T17:40:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-34", "2026-09-04T23:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-35", "2026-09-05T20:10:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-36", "2026-09-06T17:40:00Z", "NY Mets vs Phillies", "Citi Field", "MLB", "NY Mets"],
-  ["mets-37", "2026-09-18T23:10:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-38", "2026-09-19T20:10:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["mets-39", "2026-09-20T17:40:00Z", "NY Mets vs Braves", "Citi Field", "MLB", "NY Mets"],
-  ["giants-1", "2026-09-13T17:00:00Z", "NY Giants vs Cowboys", "MetLife Stadium", "NFL", "NY Giants"],
-  ["giants-2", "2026-09-20T20:25:00Z", "NY Giants vs Eagles", "MetLife Stadium", "NFL", "NY Giants"],
-  ["giants-3", "2026-10-11T17:00:00Z", "NY Giants vs Commanders", "MetLife Stadium", "NFL", "NY Giants"],
-  ["giants-4", "2026-11-01T18:00:00Z", "NY Giants vs Packers", "MetLife Stadium", "NFL", "NY Giants"],
-  ["giants-5", "2026-12-13T18:00:00Z", "NY Giants vs Patriots", "MetLife Stadium", "NFL", "NY Giants"]
+const nyGiantsFallback2026: SportsEvent[] = [
+  ["giants-1", "2026-09-13T17:00:00Z", "Dallas Cowboys at NY Giants", "MetLife Stadium"],
+  ["giants-2", "2026-09-20T20:25:00Z", "NY Giants at Philadelphia Eagles", "Lincoln Financial Field"],
+  ["giants-3", "2026-09-27T17:00:00Z", "Washington Commanders at NY Giants", "MetLife Stadium"],
+  ["giants-4", "2026-10-04T17:00:00Z", "NY Giants at Chicago Bears", "Soldier Field"],
+  ["giants-5", "2026-10-11T17:00:00Z", "Green Bay Packers at NY Giants", "MetLife Stadium"],
+  ["giants-6", "2026-10-18T20:05:00Z", "NY Giants at Detroit Lions", "Ford Field"],
+  ["giants-7", "2026-10-25T17:00:00Z", "San Francisco 49ers at NY Giants", "MetLife Stadium"],
+  ["giants-8", "2026-11-01T18:00:00Z", "NY Giants at New England Patriots", "Gillette Stadium"],
+  ["giants-9", "2026-11-08T18:00:00Z", "Minnesota Vikings at NY Giants", "MetLife Stadium"],
+  ["giants-10", "2026-11-15T18:00:00Z", "NY Giants at Buffalo Bills", "Highmark Stadium"],
+  ["giants-11", "2026-11-22T18:00:00Z", "Las Vegas Raiders at NY Giants", "MetLife Stadium"],
+  ["giants-12", "2026-11-26T21:30:00Z", "NY Giants at Dallas Cowboys", "AT&T Stadium"],
+  ["giants-13", "2026-12-06T18:00:00Z", "Philadelphia Eagles at NY Giants", "MetLife Stadium"],
+  ["giants-14", "2026-12-13T18:00:00Z", "NY Giants at Washington Commanders", "Northwest Stadium"],
+  ["giants-15", "2026-12-20T18:00:00Z", "Seattle Seahawks at NY Giants", "MetLife Stadium"],
+  ["giants-16", "2026-12-27T18:00:00Z", "NY Giants at Miami Dolphins", "Hard Rock Stadium"],
+  ["giants-17", "2027-01-03T18:00:00Z", "NY Giants at Dallas Cowboys", "AT&T Stadium"]
 ].map((event) => ({
   id: event[0],
   startTimeIso: event[1],
   title: event[2],
   location: event[3],
-  category: event[4] as EventCategory,
-  teamOrSeries: event[5]
+  category: "NFL" as const,
+  teamOrSeries: "NY Giants"
+}));
+
+const nyMetsFallbackSubset2026: SportsEvent[] = [
+  ["mets-fallback-1", "2026-03-30T20:10:00Z", "NY Mets vs Nationals", "Citi Field"],
+  ["mets-fallback-2", "2026-04-10T23:10:00Z", "NY Mets vs Marlins", "Citi Field"],
+  ["mets-fallback-3", "2026-05-22T23:10:00Z", "NY Mets vs Braves", "Citi Field"],
+  ["mets-fallback-4", "2026-06-18T17:10:00Z", "NY Mets vs Phillies", "Citi Field"],
+  ["mets-fallback-5", "2026-07-04T17:10:00Z", "NY Mets vs Yankees", "Citi Field"],
+  ["mets-fallback-6", "2026-08-16T17:40:00Z", "NY Mets vs Braves", "Citi Field"],
+  ["mets-fallback-7", "2026-09-20T17:40:00Z", "NY Mets vs Braves", "Citi Field"]
+].map((event) => ({
+  id: event[0],
+  startTimeIso: event[1],
+  title: event[2],
+  location: event[3],
+  category: "MLB" as const,
+  teamOrSeries: "NY Mets"
 }));
 
 export const sportsEvents: SportsEvent[] = [
-  ...nyTeams2026,
-  ...uciEvents2026,
-  ...uciGrandTourStages2026,
+  ...nyMetsFallbackSubset2026,
+  ...nyGiantsFallback2026,
+  ...uciOneDayEvents2026,
+  ...uciStageRaces2026,
   ...motorsport2026
 ].sort((a, b) => new Date(a.startTimeIso).getTime() - new Date(b.startTimeIso).getTime());

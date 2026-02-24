@@ -23,23 +23,22 @@ type StageRaceConfig = {
   location: string;
   firstStageDateIso: string;
   stageCount: number;
-  restAfterStages: number[];
+  restAfterStages?: number[];
 };
 
 function atNoonUtc(dateIso: string): string {
   return `${dateIso}T12:00:00Z`;
 }
 
-function createGrandTourStages(config: StageRaceConfig): SportsEvent[] {
+function createStageRaceStages(config: StageRaceConfig): SportsEvent[] {
   const stages: SportsEvent[] = [];
-  const restSet = new Set(config.restAfterStages);
+  const restSet = new Set(config.restAfterStages ?? []);
   const dayCursor = new Date(`${config.firstStageDateIso}T00:00:00Z`);
 
   for (let stage = 1; stage <= config.stageCount; stage += 1) {
     const y = dayCursor.getUTCFullYear();
     const m = `${dayCursor.getUTCMonth() + 1}`.padStart(2, "0");
     const d = `${dayCursor.getUTCDate()}`.padStart(2, "0");
-    const dateIso = `${y}-${m}-${d}`;
 
     stages.push({
       id: `${config.raceIdPrefix}-stage-${stage}`,
@@ -47,7 +46,7 @@ function createGrandTourStages(config: StageRaceConfig): SportsEvent[] {
       category: "Cycling",
       teamOrSeries: "UCI World Tour",
       location: config.location,
-      startTimeIso: atNoonUtc(dateIso),
+      startTimeIso: atNoonUtc(`${y}-${m}-${d}`),
       source: "UCI WorldTour / race organizer calendar",
       isTimeTbd: true
     });
@@ -62,10 +61,8 @@ function createGrandTourStages(config: StageRaceConfig): SportsEvent[] {
 const uciEvents2026: SportsEvent[] = [
   ["2026-01-20", "Santos Tour Down Under", "Adelaide, Australia"],
   ["2026-01-25", "Cadel Evans Great Ocean Road Race", "Geelong, Australia"],
-  ["2026-02-16", "UAE Tour", "United Arab Emirates"],
+  ["2026-02-28", "Omloop Nieuwsblad", "Belgium"],
   ["2026-03-07", "Strade Bianche", "Siena, Italy"],
-  ["2026-03-08", "Paris-Nice", "France"],
-  ["2026-03-09", "Tirreno-Adriatico", "Italy"],
   ["2026-03-21", "Milano-Sanremo", "Italy"],
   ["2026-03-25", "Classic Brugge-De Panne", "Belgium"],
   ["2026-03-27", "E3 Saxo Classic", "Belgium"],
@@ -80,15 +77,12 @@ const uciEvents2026: SportsEvent[] = [
   ["2026-06-07", "Criterium du Dauphine", "France"],
   ["2026-06-14", "Tour de Suisse", "Switzerland"],
   ["2026-08-01", "Donostia San Sebastian Klasikoa", "Spain"],
-  ["2026-08-03", "Tour de Pologne", "Poland"],
   ["2026-08-16", "BEMER Cyclassics", "Hamburg, Germany"],
-  ["2026-08-19", "Renewi Tour", "Belgium / Netherlands"],
   ["2026-09-11", "Grand Prix Cycliste de Quebec", "Quebec, Canada"],
   ["2026-09-13", "Grand Prix Cycliste de Montreal", "Montreal, Canada"],
-  ["2026-10-10", "Il Lombardia", "Italy"],
-  ["2026-10-13", "Gree-Tour of Guangxi", "China"]
+  ["2026-10-10", "Il Lombardia", "Italy"]
 ].map((race, index) => ({
-  id: `uci-2026-race-${index + 1}`,
+  id: `uci-2026-one-day-${index + 1}`,
   title: race[1],
   category: "Cycling" as const,
   teamOrSeries: "UCI World Tour",
@@ -98,31 +92,19 @@ const uciEvents2026: SportsEvent[] = [
   isTimeTbd: true
 }));
 
-const uciGrandTourStages2026: SportsEvent[] = [
-  ...createGrandTourStages({
-    raceIdPrefix: "giro-2026",
-    raceName: "Giro d'Italia",
-    location: "Italy",
-    firstStageDateIso: "2026-05-09",
-    stageCount: 21,
-    restAfterStages: [9, 15]
-  }),
-  ...createGrandTourStages({
-    raceIdPrefix: "tdf-2026",
-    raceName: "Tour de France",
-    location: "France",
-    firstStageDateIso: "2026-07-04",
-    stageCount: 21,
-    restAfterStages: [9, 15]
-  }),
-  ...createGrandTourStages({
-    raceIdPrefix: "vuelta-2026",
-    raceName: "La Vuelta a Espana",
-    location: "Spain",
-    firstStageDateIso: "2026-08-22",
-    stageCount: 21,
-    restAfterStages: [9, 15]
-  })
+const uciStageRaces2026: SportsEvent[] = [
+  ...createStageRaceStages({ raceIdPrefix: "tdu-2026", raceName: "Santos Tour Down Under", location: "Australia", firstStageDateIso: "2026-01-20", stageCount: 6 }),
+  ...createStageRaceStages({ raceIdPrefix: "uae-2026", raceName: "UAE Tour", location: "UAE", firstStageDateIso: "2026-02-16", stageCount: 7 }),
+  ...createStageRaceStages({ raceIdPrefix: "paris-nice-2026", raceName: "Paris-Nice", location: "France", firstStageDateIso: "2026-03-08", stageCount: 8 }),
+  ...createStageRaceStages({ raceIdPrefix: "tirreno-2026", raceName: "Tirreno-Adriatico", location: "Italy", firstStageDateIso: "2026-03-09", stageCount: 7 }),
+  ...createStageRaceStages({ raceIdPrefix: "giro-2026", raceName: "Giro d'Italia", location: "Italy", firstStageDateIso: "2026-05-09", stageCount: 21, restAfterStages: [9, 15] }),
+  ...createStageRaceStages({ raceIdPrefix: "dauphine-2026", raceName: "Criterium du Dauphine", location: "France", firstStageDateIso: "2026-06-07", stageCount: 8 }),
+  ...createStageRaceStages({ raceIdPrefix: "suisse-2026", raceName: "Tour de Suisse", location: "Switzerland", firstStageDateIso: "2026-06-14", stageCount: 8 }),
+  ...createStageRaceStages({ raceIdPrefix: "tdf-2026", raceName: "Tour de France", location: "France", firstStageDateIso: "2026-07-04", stageCount: 21, restAfterStages: [9, 15] }),
+  ...createStageRaceStages({ raceIdPrefix: "pologne-2026", raceName: "Tour de Pologne", location: "Poland", firstStageDateIso: "2026-08-03", stageCount: 7 }),
+  ...createStageRaceStages({ raceIdPrefix: "renewi-2026", raceName: "Renewi Tour", location: "Belgium / Netherlands", firstStageDateIso: "2026-08-19", stageCount: 5 }),
+  ...createStageRaceStages({ raceIdPrefix: "vuelta-2026", raceName: "La Vuelta a Espana", location: "Spain", firstStageDateIso: "2026-08-22", stageCount: 21, restAfterStages: [9, 15] }),
+  ...createStageRaceStages({ raceIdPrefix: "guangxi-2026", raceName: "Gree-Tour of Guangxi", location: "China", firstStageDateIso: "2026-10-13", stageCount: 6 })
 ];
 
 const motorsport2026: SportsEvent[] = [

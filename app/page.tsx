@@ -1,8 +1,9 @@
 import { SportsCalendar } from "@/components/sports-calendar";
-import { sportsEvents } from "@/data/events";
+import { refreshSchedulesFromSources } from "@/lib/live-sources";
 
-export const revalidate = 86_400;
+export const revalidate = 1_800;
 
-export default function Home() {
-  return <SportsCalendar events={sportsEvents} />;
+export default async function Home() {
+  const refreshed = await refreshSchedulesFromSources();
+  return <SportsCalendar events={refreshed.events} />;
 }

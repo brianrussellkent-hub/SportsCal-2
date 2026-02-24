@@ -2,13 +2,13 @@
 
 A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript for Vercel.
 
-## Included coverage
+## Included coverage targets
 
 - NY Mets (expanded 2026 slate)
 - NY Giants (NFL)
 - UCI World Tour cycling
-  - includes individual stage entries for Giro d'Italia, Tour de France, and La Vuelta a España
-- Formula 1
+  - one-day events + stage-by-stage entries for all configured stage races
+- Formula 1 (via Ergast refresh)
 - NASCAR
 
 ## Key behavior

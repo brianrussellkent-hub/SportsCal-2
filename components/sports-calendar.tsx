@@ -220,6 +220,8 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
         <a href="https://play.hbomax.com/sports" target="_blank" rel="noreferrer">HBO Max Sports</a>
         <a href="https://www.peacocktv.com/watch/sports-icon-tile-cycling" target="_blank" rel="noreferrer">Peacock Cycling</a>
         <a href="https://www.mlb.com/mets/schedule/2026-02" target="_blank" rel="noreferrer">Mets 2026 Schedule</a>
+        <a href="https://www.hulu.com/sports_team/77becc9e-5b26-4f24-82b6-e8f236c0fa8d" target="_blank" rel="noreferrer">Mets on Hulu</a>
+        <a href="https://www.hulu.com/sports_team/5e608281-ef1c-417a-9af3-70e4a7c780ab" target="_blank" rel="noreferrer">Giants on Hulu</a>
         <a href="https://www.formula1.com/en/racing/2026" target="_blank" rel="noreferrer">F1 2026 Schedule</a>
         <a href="https://tv.apple.com/us/channel/formula-1/tvs.sbd.241000" target="_blank" rel="noreferrer">Apple TV Formula 1</a>
         <a href="https://www.nascar.com/nascar-cup-series/2026/schedule/" target="_blank" rel="noreferrer">NASCAR 2026 Schedule</a>

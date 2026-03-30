@@ -133,7 +133,8 @@ const motorsport2026: SportsEvent[] = [
   category: "Formula 1" as const,
   teamOrSeries: "F1 World Championship",
   location: event[3],
-  startTimeIso: event[1]
+  startTimeIso: event[1],
+  source: "Formula1.com 2026 race calendar / start times"
 }));
 
 const nyGiantsFallback2026: SportsEvent[] = [

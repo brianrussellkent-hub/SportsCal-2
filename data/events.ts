@@ -3,7 +3,6 @@ export type EventCategory =
   | "NFL"
   | "Cycling"
   | "Formula 1"
-  | "NASCAR"
   | (string & {});
 
 export type SportsEvent = {
@@ -108,25 +107,26 @@ const motorsport2026: SportsEvent[] = [
   ["f1-1", "2026-03-08T04:00:00Z", "Formula 1 Australian Grand Prix", "Melbourne"],
   ["f1-2", "2026-03-15T07:00:00Z", "Formula 1 Chinese Grand Prix", "Shanghai"],
   ["f1-3", "2026-03-29T05:00:00Z", "Formula 1 Japanese Grand Prix", "Suzuka"],
-  ["f1-4", "2026-05-03T20:00:00Z", "Formula 1 Miami Grand Prix", "Miami"],
-  ["f1-5", "2026-05-24T20:00:00Z", "Formula 1 Canadian Grand Prix", "Montreal"],
-  ["f1-6", "2026-06-07T13:00:00Z", "Formula 1 Monaco Grand Prix", "Monaco"],
-  ["f1-7", "2026-06-14T13:00:00Z", "Formula 1 Barcelona-Catalunya Grand Prix", "Barcelona-Catalunya"],
-  ["f1-8", "2026-06-28T13:00:00Z", "Formula 1 Austrian Grand Prix", "Spielberg"],
-  ["f1-9", "2026-07-05T14:00:00Z", "Formula 1 British Grand Prix", "Silverstone"],
-  ["f1-10", "2026-07-19T13:00:00Z", "Formula 1 Belgian Grand Prix", "Spa-Francorchamps"],
-  ["f1-11", "2026-07-26T13:00:00Z", "Formula 1 Hungarian Grand Prix", "Budapest"],
-  ["f1-12", "2026-08-23T13:00:00Z", "Formula 1 Dutch Grand Prix", "Zandvoort"],
-  ["f1-13", "2026-09-06T13:00:00Z", "Formula 1 Italian Grand Prix", "Monza"],
-  ["f1-14", "2026-09-13T13:00:00Z", "Formula 1 Spanish Grand Prix", "Madrid"],
-  ["f1-15", "2026-09-26T11:00:00Z", "Formula 1 Azerbaijan Grand Prix", "Baku"],
-  ["f1-16", "2026-10-11T12:00:00Z", "Formula 1 Singapore Grand Prix", "Singapore"],
-  ["f1-17", "2026-10-25T19:00:00Z", "Formula 1 United States Grand Prix", "Austin"],
-  ["f1-18", "2026-11-01T20:00:00Z", "Formula 1 Mexico City Grand Prix", "Mexico City"],
-  ["f1-19", "2026-11-08T17:00:00Z", "Formula 1 Sao Paulo Grand Prix", "Sao Paulo"],
-  ["f1-20", "2026-11-21T04:00:00Z", "Formula 1 Las Vegas Grand Prix", "Las Vegas"],
-  ["f1-21", "2026-11-29T16:00:00Z", "Formula 1 Qatar Grand Prix", "Lusail"],
-  ["f1-22", "2026-12-06T13:00:00Z", "Formula 1 Abu Dhabi Grand Prix", "Yas Marina"]
+  ["f1-4", "2026-04-12T15:00:00Z", "Formula 1 Bahrain Grand Prix", "Sakhir"],
+  ["f1-5", "2026-04-19T17:00:00Z", "Formula 1 Saudi Arabian Grand Prix", "Jeddah"],
+  ["f1-6", "2026-05-03T17:00:00Z", "Formula 1 Qatar Grand Prix", "Lusail"],
+  ["f1-7", "2026-05-17T13:00:00Z", "Formula 1 Emilia-Romagna Grand Prix", "Imola"],
+  ["f1-8", "2026-05-24T13:00:00Z", "Formula 1 Monaco Grand Prix", "Monaco"],
+  ["f1-9", "2026-06-07T13:00:00Z", "Formula 1 Spanish Grand Prix", "Barcelona"],
+  ["f1-10", "2026-06-14T18:00:00Z", "Formula 1 Canadian Grand Prix", "Montreal"],
+  ["f1-11", "2026-06-28T13:00:00Z", "Formula 1 Austrian Grand Prix", "Spielberg"],
+  ["f1-12", "2026-07-05T14:00:00Z", "Formula 1 British Grand Prix", "Silverstone"],
+  ["f1-13", "2026-07-19T13:00:00Z", "Formula 1 Belgian Grand Prix", "Spa-Francorchamps"],
+  ["f1-14", "2026-07-26T13:00:00Z", "Formula 1 Hungarian Grand Prix", "Budapest"],
+  ["f1-15", "2026-08-30T13:00:00Z", "Formula 1 Dutch Grand Prix", "Zandvoort"],
+  ["f1-16", "2026-09-06T13:00:00Z", "Formula 1 Italian Grand Prix", "Monza"],
+  ["f1-17", "2026-09-20T11:00:00Z", "Formula 1 Azerbaijan Grand Prix", "Baku"],
+  ["f1-18", "2026-10-04T12:00:00Z", "Formula 1 Singapore Grand Prix", "Singapore"],
+  ["f1-19", "2026-10-18T19:00:00Z", "Formula 1 United States Grand Prix", "Austin"],
+  ["f1-20", "2026-10-25T20:00:00Z", "Formula 1 Mexico City Grand Prix", "Mexico City"],
+  ["f1-21", "2026-11-08T17:00:00Z", "Formula 1 Sao Paulo Grand Prix", "Sao Paulo"],
+  ["f1-22", "2026-11-22T04:00:00Z", "Formula 1 Las Vegas Grand Prix", "Las Vegas"],
+  ["f1-23", "2026-11-29T16:00:00Z", "Formula 1 Abu Dhabi Grand Prix", "Yas Marina"]
 ].map((event) => ({
   id: event[0],
   title: event[2],

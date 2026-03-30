@@ -150,7 +150,7 @@ async function fetchMetsFromMlbApi(): Promise<AdapterResult> {
 }
 
 async function fetchGiantsFromEspn(): Promise<AdapterResult> {
-  const json = await fetchJsonNoStore<{
+  const teamSchedule = await fetchJsonNoStore<{
     events?: Array<{
       id: string;
       date: string;
@@ -160,11 +160,7 @@ async function fetchGiantsFromEspn(): Promise<AdapterResult> {
     }>;
   }>("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/19/schedule?season=2026");
 
-  if (!json.ok || !json.data) {
-    return { events: [], status: `ESPN NFL: failed${json.statusCode ? ` (${json.statusCode})` : ""}`, ok: false };
-  }
-
-  const events: SportsEvent[] = (json.data.events ?? []).map((event) => {
+  const events: SportsEvent[] = (teamSchedule.data?.events ?? []).map((event) => {
     const description = event.status?.type?.description?.trim();
     const title = event.name ?? "NY Giants Game";
     return {
@@ -178,19 +174,80 @@ async function fetchGiantsFromEspn(): Promise<AdapterResult> {
     };
   });
 
-  if (events.length === 0) {
+  if (teamSchedule.ok && events.length > 0) {
     return {
-      events: [],
-      status: "ESPN NFL: returned 0 games; preserving existing Giants schedule",
-      ok: false
+      events,
+      status: `ESPN NFL team schedule: loaded ${events.length} Giants games`,
+      ok: true
     };
   }
 
+  const weeklyScoreboardEvents = await fetchGiantsFromWeeklyScoreboard();
+  if (weeklyScoreboardEvents.length > 0) {
+    return {
+      events: weeklyScoreboardEvents,
+      status: `ESPN NFL weekly scoreboard fallback: loaded ${weeklyScoreboardEvents.length} Giants games`,
+      ok: true
+    };
+  }
+
+  const teamStatus = teamSchedule.ok
+    ? "team schedule empty"
+    : `team schedule failed${teamSchedule.statusCode ? ` (${teamSchedule.statusCode})` : ""}`;
+
   return {
-    events,
-    status: `ESPN NFL: loaded ${events.length} Giants games`,
-    ok: true
+    events: [],
+    status: `ESPN NFL returned 0 Giants games (${teamStatus}; scoreboard fallback empty)`,
+    ok: false
   };
+}
+
+async function fetchGiantsFromWeeklyScoreboard(): Promise<SportsEvent[]> {
+  const events: SportsEvent[] = [];
+  const seenEventIds = new Set<string>();
+
+  for (let week = 1; week <= 18; week += 1) {
+    const scoreboard = await fetchJsonNoStore<{
+      events?: Array<{
+        id: string;
+        date: string;
+        name?: string;
+        status?: { type?: { description?: string } };
+        competitions?: Array<{
+          venue?: { fullName?: string };
+          competitors?: Array<{ team?: { id?: string } }>;
+        }>;
+      }>;
+    }>(
+      `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${week}&year=2026`
+    );
+
+    if (!scoreboard.ok || !scoreboard.data) continue;
+
+    for (const event of scoreboard.data.events ?? []) {
+      const hasGiants = (event.competitions?.[0]?.competitors ?? []).some(
+        (competitor) => competitor.team?.id === "19"
+      );
+
+      if (!hasGiants || seenEventIds.has(event.id)) continue;
+      seenEventIds.add(event.id);
+
+      const description = event.status?.type?.description?.trim();
+      const title = event.name ?? "NY Giants Game";
+
+      events.push({
+        id: `giants-${event.id}`,
+        title: description ? `${title} (${description})` : title,
+        category: "NFL",
+        teamOrSeries: "NY Giants",
+        location: event.competitions?.[0]?.venue?.fullName ?? "TBD Venue",
+        startTimeIso: event.date,
+        source: "ESPN NFL"
+      });
+    }
+  }
+
+  return events;
 }
 
 async function fetchF1FromSources(): Promise<AdapterResult> {
@@ -207,6 +264,35 @@ async function fetchF1FromSources(): Promise<AdapterResult> {
       };
     };
   };
+
+  const espnSchedule = await fetchJsonNoStore<{
+    events?: Array<{
+      id: string;
+      date: string;
+      name?: string;
+      competitions?: Array<{ venue?: { fullName?: string } }>;
+    }>;
+  }>("https://site.api.espn.com/apis/site/v2/sports/racing/f1/schedule?season=2026");
+
+  if (espnSchedule.ok && espnSchedule.data) {
+    const espnEvents: SportsEvent[] = (espnSchedule.data.events ?? []).map((race) => ({
+      id: `f1-espn-${race.id}`,
+      title: race.name ?? "Formula 1 Race",
+      category: "Formula 1",
+      teamOrSeries: "F1 World Championship",
+      location: race.competitions?.[0]?.venue?.fullName ?? "TBD Venue",
+      startTimeIso: race.date,
+      source: "ESPN F1"
+    }));
+
+    if (espnEvents.length > 0) {
+      return {
+        events: espnEvents,
+        status: `ESPN F1: loaded ${espnEvents.length} races`,
+        ok: true
+      };
+    }
+  }
 
   const candidates: Array<{ name: string; url: string }> = [
     { name: "Ergast", url: "https://ergast.com/api/f1/2026.json" },

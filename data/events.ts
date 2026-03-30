@@ -76,6 +76,8 @@ const uciOneDayEvents2026: SportsEvent[] = [
   ["2026-08-16", "BEMER Cyclassics", "Hamburg, Germany"],
   ["2026-09-11", "Grand Prix Cycliste de Quebec", "Quebec, Canada"],
   ["2026-09-13", "Grand Prix Cycliste de Montreal", "Montreal, Canada"],
+  ["2026-09-20", "UCI Road World Championships - Men Elite Individual Time Trial", "Montreal, Canada"],
+  ["2026-09-27", "UCI Road World Championships - Men Elite Road Race", "Brossard, Canada"],
   ["2026-10-10", "Il Lombardia", "Italy"]
 ].map((race, index) => ({
   id: `uci-2026-one-day-${index + 1}`,

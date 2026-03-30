@@ -9,16 +9,15 @@ A dark-mode 2026 sports calendar built with Next.js (App Router) + TypeScript fo
 - UCI World Tour cycling
   - one-day events + stage-by-stage entries for all configured stage races
 - Formula 1 (via Ergast refresh)
-- NASCAR
 
 ## Key behavior
 
 - Month / Week / Day viewing options.
 - Monday-first calendar layout (Monday left, Sunday right).
-- Category-colored events (MLB/NFL/Cycling/F1/NASCAR).
+- Category-colored events (MLB/NFL/Cycling/F1).
 - **Today** button jumps directly to current ET day.
 - **Refresh schedules** checks all tracked sports sources/adapters and merges missing events into the calendar.
-- Main page includes quick links to FloBikes, HBO Max Sports, Peacock Cycling, Mets schedule, F1 schedule, Apple TV Formula 1, Mets on Hulu, Giants on Hulu, and NASCAR schedule pages.
+- Main page includes quick links to FloBikes, HBO Max Sports, Peacock Cycling, Mets schedule, F1 schedule, Apple TV Formula 1, Mets on Hulu, and Giants on Hulu pages.
 - All times rendered in Eastern Time (`America/New_York`).
 - Only events with unconfirmed public start times are marked **Time TBD (ET)**.
 - Filter by category and team/series.

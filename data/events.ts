@@ -3,7 +3,6 @@ export type EventCategory =
   | "NFL"
   | "Cycling"
   | "Formula 1"
-  | "NASCAR"
   | (string & {});
 
 export type SportsEvent = {
@@ -127,19 +126,12 @@ const motorsport2026: SportsEvent[] = [
   ["f1-20", "2026-10-25T20:00:00Z", "Formula 1 Mexico City Grand Prix", "Mexico City"],
   ["f1-21", "2026-11-08T17:00:00Z", "Formula 1 Sao Paulo Grand Prix", "Sao Paulo"],
   ["f1-22", "2026-11-22T04:00:00Z", "Formula 1 Las Vegas Grand Prix", "Las Vegas"],
-  ["f1-23", "2026-11-29T16:00:00Z", "Formula 1 Abu Dhabi Grand Prix", "Yas Marina"],
-  ["nas-1", "2026-02-15T19:30:00Z", "DAYTONA 500", "Daytona"],
-  ["nas-2", "2026-03-15T19:30:00Z", "Pennzoil 400 at Las Vegas Motor Speedway", "Las Vegas Motor Speedway"],
-  ["nas-3", "2026-04-12T23:00:00Z", "NASCAR Cup at Bristol", "Bristol"],
-  ["nas-4", "2026-05-24T22:00:00Z", "Coca-Cola 600", "Charlotte"],
-  ["nas-5", "2026-07-05T19:30:00Z", "NASCAR Chicago Street Race", "Chicago"],
-  ["nas-6", "2026-09-06T23:30:00Z", "NASCAR Playoffs: Darlington", "Darlington"],
-  ["nas-7", "2026-11-08T20:00:00Z", "NASCAR Championship Race", "Phoenix"]
+  ["f1-23", "2026-11-29T16:00:00Z", "Formula 1 Abu Dhabi Grand Prix", "Yas Marina"]
 ].map((event) => ({
   id: event[0],
   title: event[2],
-  category: event[0].startsWith("f1") ? ("Formula 1" as const) : ("NASCAR" as const),
-  teamOrSeries: event[0].startsWith("f1") ? "F1 World Championship" : "NASCAR Cup Series",
+  category: "Formula 1" as const,
+  teamOrSeries: "F1 World Championship",
   location: event[3],
   startTimeIso: event[1]
 }));

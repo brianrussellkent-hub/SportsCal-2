@@ -150,6 +150,7 @@ async function fetchMetsFromMlbApi(): Promise<AdapterResult> {
 }
 
 async function fetchGiantsFromEspn(): Promise<AdapterResult> {
+  const fallbackGiants = getCanonicalGiantsEvents();
   const teamSchedule = await fetchJsonNoStore<{
     events?: Array<{
       id: string;
@@ -196,9 +197,9 @@ async function fetchGiantsFromEspn(): Promise<AdapterResult> {
     : `team schedule failed${teamSchedule.statusCode ? ` (${teamSchedule.statusCode})` : ""}`;
 
   return {
-    events: [],
-    status: `ESPN NFL returned 0 Giants games (${teamStatus}; scoreboard fallback empty)`,
-    ok: false
+    events: fallbackGiants.events,
+    status: `ESPN NFL returned 0 Giants games (${teamStatus}; scoreboard fallback empty). Using canonical Giants fallback (${fallbackGiants.events.length} games)`,
+    ok: true
   };
 }
 
@@ -356,14 +357,14 @@ function getCanonicalCyclingEvents(): AdapterResult {
   };
 }
 
-function getCanonicalNascarEvents(): AdapterResult {
+function getCanonicalGiantsEvents(): AdapterResult {
   const events = sportsEvents
-    .filter((event) => event.category === "NASCAR" && event.teamOrSeries === "NASCAR Cup Series")
-    .map((event) => ({ ...event, source: event.source ?? "NASCAR canonical schedule" }));
+    .filter((event) => event.category === "NFL" && event.teamOrSeries === "NY Giants")
+    .map((event) => ({ ...event, source: event.source ?? "Bundled Giants schedule fallback" }));
 
   return {
     events,
-    status: `NASCAR canonical reference: loaded ${events.length} races`,
+    status: `Giants canonical fallback: loaded ${events.length} games`,
     ok: true
   };
 }
@@ -394,13 +395,6 @@ export async function refreshSchedulesFromSources(): Promise<RefreshResult> {
         include: (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
       },
       result: getCanonicalCyclingEvents()
-    },
-    {
-      scope: {
-        name: "NASCAR",
-        include: (event) => event.category === "NASCAR" && event.teamOrSeries === "NASCAR Cup Series"
-      },
-      result: getCanonicalNascarEvents()
     }
   ];
 

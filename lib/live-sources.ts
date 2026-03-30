@@ -78,122 +78,152 @@ function replaceScope(
   return [...merged.filter((event) => !scope.include(event)), ...replacement];
 }
 
-async function fetchMetsFromMlbApi(): Promise<AdapterResult> {
+
+type JsonFetchResult<T> = {
+  ok: boolean;
+  statusCode?: number;
+  data?: T;
+};
+
+async function fetchJsonNoStore<T>(url: string): Promise<JsonFetchResult<T>> {
   try {
-    const res = await fetch(
-      "https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=121&season=2026&gameType=R",
-      { cache: "no-store" }
-    );
-    if (!res.ok) return { events: [], status: "MLB Stats API: failed", ok: false };
-
-    const data = (await res.json()) as {
-      dates?: Array<{
-        games?: Array<{
-          gamePk: number;
-          gameDate: string;
-          venue?: { name?: string };
-          teams?: {
-            away?: { team?: { name?: string } };
-            home?: { team?: { name?: string } };
-          };
-          status?: { detailedState?: string };
-        }>;
-      }>;
-    };
-
-    const events: SportsEvent[] = [];
-    for (const day of data.dates ?? []) {
-      for (const game of day.games ?? []) {
-        const away = game.teams?.away?.team?.name ?? "Away Team";
-        const home = game.teams?.home?.team?.name ?? "Home Team";
-        const detailedState = game.status?.detailedState?.trim();
-
-        events.push({
-          id: `mets-${game.gamePk}`,
-          title: detailedState ? `${away} at ${home} (${detailedState})` : `${away} at ${home}`,
-          category: "MLB",
-          teamOrSeries: "NY Mets",
-          location: game.venue?.name ?? "TBD Venue",
-          startTimeIso: game.gameDate,
-          source: "MLB Stats API"
-        });
-      }
-    }
-
-    return {
-      events,
-      status: `MLB Stats API: loaded ${events.length} Mets games`,
-      ok: true
-    };
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return { ok: false, statusCode: res.status };
+    return { ok: true, statusCode: res.status, data: (await res.json()) as T };
   } catch {
-    return { events: [], status: "MLB Stats API: failed", ok: false };
+    return { ok: false };
   }
+}
+
+async function fetchMetsFromMlbApi(): Promise<AdapterResult> {
+  const json = await fetchJsonNoStore<{
+    dates?: Array<{
+      games?: Array<{
+        gamePk: number;
+        gameDate: string;
+        venue?: { name?: string };
+        teams?: {
+          away?: { team?: { name?: string } };
+          home?: { team?: { name?: string } };
+        };
+        status?: { detailedState?: string };
+      }>;
+    }>;
+  }>("https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=121&season=2026&gameType=R");
+
+  if (!json.ok || !json.data) {
+    return { events: [], status: `MLB Stats API: failed${json.statusCode ? ` (${json.statusCode})` : ""}`, ok: false };
+  }
+
+  const events: SportsEvent[] = [];
+  for (const day of json.data.dates ?? []) {
+    for (const game of day.games ?? []) {
+      const away = game.teams?.away?.team?.name ?? "Away Team";
+      const home = game.teams?.home?.team?.name ?? "Home Team";
+      const detailedState = game.status?.detailedState?.trim();
+
+      events.push({
+        id: `mets-${game.gamePk}`,
+        title: detailedState ? `${away} at ${home} (${detailedState})` : `${away} at ${home}`,
+        category: "MLB",
+        teamOrSeries: "NY Mets",
+        location: game.venue?.name ?? "TBD Venue",
+        startTimeIso: game.gameDate,
+        source: "MLB Stats API"
+      });
+    }
+  }
+
+  if (events.length === 0) {
+    return {
+      events: [],
+      status: "MLB Stats API: returned 0 games; preserving existing Mets schedule",
+      ok: false
+    };
+  }
+
+  return {
+    events,
+    status: `MLB Stats API: loaded ${events.length} Mets games`,
+    ok: true
+  };
 }
 
 async function fetchGiantsFromEspn(): Promise<AdapterResult> {
-  try {
-    const res = await fetch(
-      "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/19/schedule?season=2026",
-      { cache: "no-store" }
-    );
-    if (!res.ok) return { events: [], status: "ESPN NFL: failed", ok: false };
+  const json = await fetchJsonNoStore<{
+    events?: Array<{
+      id: string;
+      date: string;
+      name?: string;
+      status?: { type?: { description?: string } };
+      competitions?: Array<{ venue?: { fullName?: string } }>;
+    }>;
+  }>("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/19/schedule?season=2026");
 
-    const data = (await res.json()) as {
-      events?: Array<{
-        id: string;
-        date: string;
-        name?: string;
-        status?: { type?: { description?: string } };
-        competitions?: Array<{ venue?: { fullName?: string } }>;
-      }>;
-    };
-
-    const events: SportsEvent[] = (data.events ?? []).map((event) => {
-      const description = event.status?.type?.description?.trim();
-      const title = event.name ?? "NY Giants Game";
-      return {
-        id: `giants-${event.id}`,
-        title: description ? `${title} (${description})` : title,
-        category: "NFL",
-        teamOrSeries: "NY Giants",
-        location: event.competitions?.[0]?.venue?.fullName ?? "TBD Venue",
-        startTimeIso: event.date,
-        source: "ESPN NFL"
-      };
-    });
-
-    return {
-      events,
-      status: `ESPN NFL: loaded ${events.length} Giants games`,
-      ok: true
-    };
-  } catch {
-    return { events: [], status: "ESPN NFL: failed", ok: false };
+  if (!json.ok || !json.data) {
+    return { events: [], status: `ESPN NFL: failed${json.statusCode ? ` (${json.statusCode})` : ""}`, ok: false };
   }
+
+  const events: SportsEvent[] = (json.data.events ?? []).map((event) => {
+    const description = event.status?.type?.description?.trim();
+    const title = event.name ?? "NY Giants Game";
+    return {
+      id: `giants-${event.id}`,
+      title: description ? `${title} (${description})` : title,
+      category: "NFL",
+      teamOrSeries: "NY Giants",
+      location: event.competitions?.[0]?.venue?.fullName ?? "TBD Venue",
+      startTimeIso: event.date,
+      source: "ESPN NFL"
+    };
+  });
+
+  if (events.length === 0) {
+    return {
+      events: [],
+      status: "ESPN NFL: returned 0 games; preserving existing Giants schedule",
+      ok: false
+    };
+  }
+
+  return {
+    events,
+    status: `ESPN NFL: loaded ${events.length} Giants games`,
+    ok: true
+  };
 }
 
-async function fetchF1FromErgast(): Promise<AdapterResult> {
-  try {
-    const res = await fetch("https://ergast.com/api/f1/2026.json", {
-      cache: "no-store"
-    });
-    if (!res.ok) return { events: [], status: "Ergast F1: failed", ok: false };
-
-    const data = (await res.json()) as {
-      MRData?: {
-        RaceTable?: {
-          Races?: Array<{
-            round?: string;
-            raceName?: string;
-            date: string;
-            time?: string;
-            Circuit?: { Location?: { locality?: string; country?: string } };
-          }>;
-        };
+async function fetchF1FromSources(): Promise<AdapterResult> {
+  type ErgastPayload = {
+    MRData?: {
+      RaceTable?: {
+        Races?: Array<{
+          round?: string;
+          raceName?: string;
+          date: string;
+          time?: string;
+          Circuit?: { Location?: { locality?: string; country?: string } };
+        }>;
       };
     };
+  };
 
-    const events: SportsEvent[] = (data.MRData?.RaceTable?.Races ?? []).map((race, idx) => {
+  const candidates: Array<{ name: string; url: string }> = [
+    { name: "Ergast", url: "https://ergast.com/api/f1/2026.json" },
+    { name: "Jolpica", url: "https://api.jolpi.ca/ergast/f1/2026.json" }
+  ];
+
+  const failures: string[] = [];
+
+  for (const candidate of candidates) {
+    const json = await fetchJsonNoStore<ErgastPayload>(candidate.url);
+    if (!json.ok || !json.data) {
+      failures.push(`${candidate.name}${json.statusCode ? ` ${json.statusCode}` : ""}`.trim());
+      continue;
+    }
+
+    const races = json.data.MRData?.RaceTable?.Races ?? [];
+    const events: SportsEvent[] = races.map((race, idx) => {
       const round = race.round ?? `${idx + 1}`;
       return {
         id: `f1-ergast-${round}`,
@@ -205,18 +235,27 @@ async function fetchF1FromErgast(): Promise<AdapterResult> {
           ""
         ),
         startTimeIso: `${race.date}T${(race.time ?? "12:00:00Z").replace("+00:00", "Z")}`,
-        source: "Ergast"
+        source: candidate.name
       };
     });
 
+    if (events.length === 0) {
+      failures.push(`${candidate.name} empty schedule`);
+      continue;
+    }
+
     return {
       events,
-      status: `Ergast F1: loaded ${events.length} races`,
+      status: `${candidate.name} F1: loaded ${events.length} races`,
       ok: true
     };
-  } catch {
-    return { events: [], status: "Ergast F1: failed", ok: false };
   }
+
+  return {
+    events: [],
+    status: `F1 sources failed (${failures.join(", ") || "no response"}); preserving existing Formula 1 schedule`,
+    ok: false
+  };
 }
 
 function getCanonicalCyclingEvents(): AdapterResult {
@@ -261,7 +300,7 @@ export async function refreshSchedulesFromSources(): Promise<RefreshResult> {
         name: "Formula 1",
         include: (event) => event.category === "Formula 1" && event.teamOrSeries === "F1 World Championship"
       },
-      result: await fetchF1FromErgast()
+      result: await fetchF1FromSources()
     },
     {
       scope: {

@@ -448,6 +448,27 @@ function normalizeCalendarDate(dateLabel: string, year: string): string | null {
   return `${year}-${month}-${match[1].padStart(2, "0")}`;
 }
 
+function normalizeFlexibleCyclingDate(dateLabel: string, year: string): string | null {
+  const compact = dateLabel.replace(/\s+/g, " ").trim();
+
+  const isoMatch =
+    compact.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/) ??
+    compact.match(/\b(20\d{2})\/(\d{2})\/(\d{2})\b/);
+  if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+  const dottedMatch = compact.match(/\b(\d{2})\.(\d{2})\.(20\d{2})\b/);
+  if (dottedMatch) return `${dottedMatch[3]}-${dottedMatch[2]}-${dottedMatch[1]}`;
+
+  const monthTextMatch = compact.match(/(\d{1,2})(?:\s*[–-]\s*\d{1,2})?\s+([A-Za-z]{3,9})/);
+  if (monthTextMatch) {
+    const month = monthNumber(monthTextMatch[2]);
+    if (!month) return null;
+    return `${year}-${month}-${monthTextMatch[1].padStart(2, "0")}`;
+  }
+
+  return null;
+}
+
 function parseCyclingRowsFromWikipediaHtml(html: string, year: string): SportsEvent[] {
   const rows = html.match(/<tr[\s\S]*?<\/tr>/gi) ?? [];
   const events: SportsEvent[] = [];
@@ -564,19 +585,12 @@ function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
   const rows = html.split(/<\/tr>/i);
   const events: SportsEvent[] = [];
   const seenIds = new Set<string>();
+  const year = "2026";
 
   for (const row of rows) {
-    const dateMatch =
-      row.match(/\b(20\d{2}-\d{2}-\d{2})\b/) ??
-      row.match(/\b(20\d{2}\/\d{2}\/\d{2})\b/) ??
-      row.match(/\b(\d{2}\.\d{2}\.20\d{2})\b/);
-    if (!dateMatch) continue;
-
-    const normalizedDate = dateMatch[1].includes("/")
-      ? dateMatch[1].replace(/\//g, "-")
-      : dateMatch[1].includes(".")
-        ? `${dateMatch[1].slice(6)}-${dateMatch[1].slice(3, 5)}-${dateMatch[1].slice(0, 2)}`
-        : dateMatch[1];
+    const rowText = row.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+    const normalizedDate = normalizeFlexibleCyclingDate(rowText, year);
+    if (!normalizedDate) continue;
 
     const raceMatch =
       row.match(/<a[^>]+href="\/race\/[^"]+"[^>]*>([^<]+)<\/a>/i) ??

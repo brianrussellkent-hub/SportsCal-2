@@ -97,6 +97,12 @@ type TextFetchResult = {
   data?: string;
 };
 
+type MediaWikiParseResponse = {
+  parse?: {
+    text?: string;
+  };
+};
+
 async function fetchJsonNoStore<T>(url: string): Promise<JsonFetchResult<T>> {
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -398,6 +404,73 @@ function sanitizeRaceSlug(label: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+function monthNumber(monthLabel: string): string | null {
+  const months: Record<string, string> = {
+    january: "01",
+    february: "02",
+    march: "03",
+    april: "04",
+    may: "05",
+    june: "06",
+    july: "07",
+    august: "08",
+    september: "09",
+    october: "10",
+    november: "11",
+    december: "12"
+  };
+
+  return months[monthLabel.toLowerCase()] ?? null;
+}
+
+function normalizeCalendarDate(dateLabel: string, year: string): string | null {
+  const compact = dateLabel.replace(/\s+/g, " ").trim();
+  const match = compact.match(/(\d{1,2})(?:\s*[–-]\s*\d{1,2})?\s+([A-Za-z]+)/);
+  if (!match) return null;
+
+  const month = monthNumber(match[2]);
+  if (!month) return null;
+
+  return `${year}-${month}-${match[1].padStart(2, "0")}`;
+}
+
+function parseCyclingRowsFromWikipediaHtml(html: string, year: string): SportsEvent[] {
+  const rows = html.match(/<tr[\s\S]*?<\/tr>/gi) ?? [];
+  const events: SportsEvent[] = [];
+  const seenIds = new Set<string>();
+
+  for (const row of rows) {
+    const dateMatch = row.match(/<td[^>]*>(\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]+)<\/td>/i);
+    const raceMatch =
+      row.match(/<a[^>]*title="[^"]+"[^>]*>([^<]+)<\/a>/i) ??
+      row.match(/<a[^>]+href="\/wiki\/[^"]+"[^>]*>([^<]+)<\/a>/i);
+    if (!dateMatch || !raceMatch) continue;
+
+    const startDate = normalizeCalendarDate(dateMatch[1], year);
+    if (!startDate) continue;
+
+    const raceName = raceMatch[1].replace(/\s+/g, " ").trim();
+    if (!raceName || /^date$/i.test(raceName) || /^class$/i.test(raceName)) continue;
+
+    const id = `uci-live-${startDate}-${sanitizeRaceSlug(raceName)}`;
+    if (seenIds.has(id)) continue;
+    seenIds.add(id);
+
+    events.push({
+      id,
+      title: raceName,
+      category: "Cycling",
+      teamOrSeries: "UCI World Tour",
+      location: "TBD",
+      startTimeIso: `${startDate}T12:00:00Z`,
+      source: "Wikipedia UCI World Tour calendar",
+      isTimeTbd: true
+    });
+  }
+
+  return events;
+}
+
 function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
   const rows = html.split(/<\/tr>/i);
   const events: SportsEvent[] = [];
@@ -446,6 +519,25 @@ function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
 
 async function fetchCyclingFromSources(): Promise<AdapterResult> {
   const year = "2026";
+  const wikiUrl =
+    `https://en.wikipedia.org/w/api.php?action=parse&page=${year}_UCI_World_Tour` +
+    "&prop=text&formatversion=2&format=json";
+  const wikiResponse = await fetchJsonNoStore<MediaWikiParseResponse>(wikiUrl);
+
+  if (wikiResponse.ok && wikiResponse.data?.parse?.text) {
+    const wikiEvents = dedupe(parseCyclingRowsFromWikipediaHtml(wikiResponse.data.parse.text, year)).filter(
+      (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
+    );
+
+    if (wikiEvents.length > 0) {
+      return {
+        events: wikiEvents,
+        status: `Wikipedia UCI World Tour: loaded ${wikiEvents.length} races`,
+        ok: true
+      };
+    }
+  }
+
   const candidates = [
     `https://www.procyclingstats.com/races.php?year=${year}&circuit=1&class=1&type=stageraces`,
     `https://www.procyclingstats.com/races.php?year=${year}&circuit=1&class=1&type=onedayraces`,

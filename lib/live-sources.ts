@@ -454,16 +454,29 @@ function parseCyclingRowsFromWikipediaHtml(html: string, year: string): SportsEv
   const seenIds = new Set<string>();
 
   for (const row of rows) {
-    const dateMatch = row.match(/<td[^>]*>(\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]+)<\/td>/i);
-    const raceMatch =
-      row.match(/<a[^>]*title="[^"]+"[^>]*>([^<]+)<\/a>/i) ??
-      row.match(/<a[^>]+href="\/wiki\/[^"]+"[^>]*>([^<]+)<\/a>/i);
-    if (!dateMatch || !raceMatch) continue;
+    const tdMatches = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi));
+    if (tdMatches.length < 2) continue;
 
-    const startDate = normalizeCalendarDate(dateMatch[1], year);
+    const cellText = tdMatches
+      .map((match) => match[1].replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    if (cellText.length < 2) continue;
+
+    const dateCandidate = cellText.find((text) => /\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]{3,}/.test(text));
+    if (!dateCandidate) continue;
+
+    const raceCandidate = cellText.find(
+      (text) =>
+        !/\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]{3,}/.test(text) &&
+        !/^(class|category|country|distance)$/i.test(text) &&
+        text.length > 3
+    );
+    if (!raceCandidate) continue;
+
+    const startDate = normalizeCalendarDate(dateCandidate, year);
     if (!startDate) continue;
 
-    const raceName = raceMatch[1].replace(/\s+/g, " ").trim();
+    const raceName = raceCandidate;
     if (!raceName || /^date$/i.test(raceName) || /^class$/i.test(raceName)) continue;
 
     const id = `uci-live-${startDate}-${sanitizeRaceSlug(raceName)}`;
@@ -486,21 +499,40 @@ function parseCyclingRowsFromWikipediaHtml(html: string, year: string): SportsEv
 }
 
 function parseCyclingRowsFromWikipediaWikitext(wikitext: string, year: string): SportsEvent[] {
-  const lines = wikitext.split("\n");
+  const rowBlocks = wikitext.split(/\n\|-\n/g);
   const events: SportsEvent[] = [];
   const seenIds = new Set<string>();
 
-  for (const line of lines) {
-    const compact = line.replace(/\s+/g, " ").trim();
+  for (const block of rowBlocks) {
+    const compact = block.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
     if (!compact.startsWith("|")) continue;
 
-    const match = compact.match(
-      /^\|\s*(?:\d+\s*\|\|\s*)?(?:\[\[)?([^\]|]+)(?:\|[^\]]+)?\]?\]?\s*\|\|\s*(\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]+)/
-    );
-    if (!match) continue;
+    const columns = compact
+      .replace(/^\|\s*/, "")
+      .split(/\s*\|\|\s*/)
+      .map((column) =>
+        column
+          .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2")
+          .replace(/\[\[([^\]]+)\]\]/g, "$1")
+          .replace(/\{\{.*?\}\}/g, "")
+          .replace(/''/g, "")
+          .replace(/<[^>]+>/g, "")
+          .trim()
+      )
+      .filter(Boolean);
+    if (columns.length < 2) continue;
 
-    const raceName = match[1].replace(/''/g, "").replace(/\{\{.*?\}\}/g, "").trim();
-    const startDate = normalizeCalendarDate(match[2], year);
+    const dateCandidate = columns.find((column) => /\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]{3,}/.test(column));
+    if (!dateCandidate) continue;
+
+    const raceName =
+      columns.find(
+        (column) =>
+          !/\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]{3,}/.test(column) &&
+          !/^\d+$/.test(column) &&
+          column.length > 3
+      ) ?? "";
+    const startDate = normalizeCalendarDate(dateCandidate, year);
     if (!raceName || !startDate) continue;
 
     const id = `uci-live-${startDate}-${sanitizeRaceSlug(raceName)}`;
@@ -617,8 +649,12 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
       failures.push(`${url}${response.statusCode ? ` ${response.statusCode}` : ""}`.trim());
       continue;
     }
-
-    events.push(...parseCyclingRowsFromHtml(response.data));
+    const parsed = parseCyclingRowsFromHtml(response.data);
+    if (parsed.length === 0) {
+      failures.push(`${url} parse-empty`);
+      continue;
+    }
+    events.push(...parsed);
   }
 
   const deduped = dedupe(events).filter(

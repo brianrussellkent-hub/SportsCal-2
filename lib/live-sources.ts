@@ -469,6 +469,63 @@ function normalizeFlexibleCyclingDate(dateLabel: string, year: string): string |
   return null;
 }
 
+function toUtcDay(dateIso: string): Date {
+  return new Date(`${dateIso}T00:00:00Z`);
+}
+
+function shiftIsoDateByDays(dateIso: string, deltaDays: number): string {
+  const date = new Date(dateIso);
+  date.setUTCDate(date.getUTCDate() + deltaDays);
+  return date.toISOString();
+}
+
+function cyclingRaceBaseName(title: string): string {
+  return title.replace(/\s+-\s+Stage\s+\d+$/i, "").trim();
+}
+
+function reconcileCyclingWithCanonical(liveRaceEvents: SportsEvent[], canonicalEvents: SportsEvent[]): SportsEvent[] {
+  const groupedCanonical = new Map<string, SportsEvent[]>();
+  for (const event of canonicalEvents) {
+    const key = sanitizeRaceSlug(cyclingRaceBaseName(event.title));
+    const bucket = groupedCanonical.get(key) ?? [];
+    bucket.push(event);
+    groupedCanonical.set(key, bucket);
+  }
+
+  for (const bucket of groupedCanonical.values()) {
+    bucket.sort((a, b) => new Date(a.startTimeIso).getTime() - new Date(b.startTimeIso).getTime());
+  }
+
+  const updated = canonicalEvents.map((event) => ({ ...event }));
+  const updatedById = new Map(updated.map((event) => [event.id, event]));
+  const matchedKeys = new Set<string>();
+
+  for (const liveEvent of liveRaceEvents) {
+    const key = sanitizeRaceSlug(cyclingRaceBaseName(liveEvent.title));
+    const canonicalRaceEvents = groupedCanonical.get(key);
+    if (!canonicalRaceEvents || canonicalRaceEvents.length === 0) continue;
+
+    const canonicalStart = toUtcDay(canonicalRaceEvents[0].startTimeIso.slice(0, 10));
+    const liveStart = toUtcDay(liveEvent.startTimeIso.slice(0, 10));
+    const deltaDays = Math.round((liveStart.getTime() - canonicalStart.getTime()) / (1000 * 60 * 60 * 24));
+    matchedKeys.add(key);
+
+    for (const canonicalEvent of canonicalRaceEvents) {
+      const toUpdate = updatedById.get(canonicalEvent.id);
+      if (!toUpdate) continue;
+      toUpdate.startTimeIso = shiftIsoDateByDays(canonicalEvent.startTimeIso, deltaDays);
+      toUpdate.source = liveEvent.source ?? toUpdate.source;
+    }
+  }
+
+  const unmatchedLive = liveRaceEvents.filter((event) => !matchedKeys.has(sanitizeRaceSlug(cyclingRaceBaseName(event.title))));
+  for (const event of unmatchedLive) {
+    if (!updatedById.has(event.id)) updated.push(event);
+  }
+
+  return dedupe(updated);
+}
+
 function parseCyclingRowsFromWikipediaHtml(html: string, year: string): SportsEvent[] {
   const rows = html.match(/<tr[\s\S]*?<\/tr>/gi) ?? [];
   const events: SportsEvent[] = [];
@@ -624,7 +681,6 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
   const year = "2026";
   const failures: string[] = [];
   const canonicalCycling = getCanonicalCyclingEvents();
-  const minimumEventCount = Math.floor(canonicalCycling.events.length * 0.6);
   const wikiUrl =
     `https://en.wikipedia.org/w/api.php?action=parse&page=${year}_UCI_World_Tour` +
     "&prop=text|wikitext&format=json";
@@ -640,20 +696,15 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
       (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
     );
 
-    if (wikiEvents.length >= minimumEventCount) {
+    if (wikiEvents.length > 0) {
+      const reconciled = reconcileCyclingWithCanonical(wikiEvents, canonicalCycling.events);
       return {
-        events: wikiEvents,
-        status: `Wikipedia UCI World Tour: loaded ${wikiEvents.length} races`,
+        events: reconciled,
+        status: `Wikipedia UCI World Tour: loaded ${wikiEvents.length} races and reconciled canonical cycling schedule`,
         ok: true
       };
     }
-    if (wikiEvents.length > 0) {
-      failures.push(
-        `Wikipedia returned only ${wikiEvents.length} events (minimum ${minimumEventCount} required to avoid partial replace)`
-      );
-    } else {
-      failures.push("Wikipedia returned no parseable races");
-    }
+    failures.push("Wikipedia returned no parseable races");
   } else {
     failures.push(`Wikipedia${wikiResponse.statusCode ? ` ${wikiResponse.statusCode}` : " unavailable"}`);
   }
@@ -683,18 +734,13 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
     (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
   );
 
-  if (deduped.length >= minimumEventCount) {
+  if (deduped.length > 0) {
+    const reconciled = reconcileCyclingWithCanonical(deduped, canonicalCycling.events);
     return {
-      events: deduped,
-      status: `ProCyclingStats: loaded ${deduped.length} WorldTour races`,
+      events: reconciled,
+      status: `ProCyclingStats: loaded ${deduped.length} races and reconciled canonical cycling schedule`,
       ok: true
     };
-  }
-
-  if (deduped.length > 0) {
-    failures.push(
-      `ProCyclingStats returned only ${deduped.length} events (minimum ${minimumEventCount} required to avoid partial replace)`
-    );
   }
 
   const fallback = canonicalCycling;

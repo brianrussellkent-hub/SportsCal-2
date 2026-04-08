@@ -498,7 +498,6 @@ function reconcileCyclingWithCanonical(liveRaceEvents: SportsEvent[], canonicalE
 
   const updated = canonicalEvents.map((event) => ({ ...event }));
   const updatedById = new Map(updated.map((event) => [event.id, event]));
-  const matchedKeys = new Set<string>();
 
   for (const liveEvent of liveRaceEvents) {
     const key = sanitizeRaceSlug(cyclingRaceBaseName(liveEvent.title));
@@ -508,7 +507,6 @@ function reconcileCyclingWithCanonical(liveRaceEvents: SportsEvent[], canonicalE
     const canonicalStart = toUtcDay(canonicalRaceEvents[0].startTimeIso.slice(0, 10));
     const liveStart = toUtcDay(liveEvent.startTimeIso.slice(0, 10));
     const deltaDays = Math.round((liveStart.getTime() - canonicalStart.getTime()) / (1000 * 60 * 60 * 24));
-    matchedKeys.add(key);
 
     for (const canonicalEvent of canonicalRaceEvents) {
       const toUpdate = updatedById.get(canonicalEvent.id);
@@ -516,11 +514,6 @@ function reconcileCyclingWithCanonical(liveRaceEvents: SportsEvent[], canonicalE
       toUpdate.startTimeIso = shiftIsoDateByDays(canonicalEvent.startTimeIso, deltaDays);
       toUpdate.source = liveEvent.source ?? toUpdate.source;
     }
-  }
-
-  const unmatchedLive = liveRaceEvents.filter((event) => !matchedKeys.has(sanitizeRaceSlug(cyclingRaceBaseName(event.title))));
-  for (const event of unmatchedLive) {
-    if (!updatedById.has(event.id)) updated.push(event);
   }
 
   return dedupe(updated);

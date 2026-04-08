@@ -623,6 +623,8 @@ function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
 async function fetchCyclingFromSources(): Promise<AdapterResult> {
   const year = "2026";
   const failures: string[] = [];
+  const canonicalCycling = getCanonicalCyclingEvents();
+  const minimumEventCount = Math.floor(canonicalCycling.events.length * 0.6);
   const wikiUrl =
     `https://en.wikipedia.org/w/api.php?action=parse&page=${year}_UCI_World_Tour` +
     "&prop=text|wikitext&format=json";
@@ -638,14 +640,20 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
       (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
     );
 
-    if (wikiEvents.length > 0) {
+    if (wikiEvents.length >= minimumEventCount) {
       return {
         events: wikiEvents,
         status: `Wikipedia UCI World Tour: loaded ${wikiEvents.length} races`,
         ok: true
       };
     }
-    failures.push("Wikipedia returned no parseable races");
+    if (wikiEvents.length > 0) {
+      failures.push(
+        `Wikipedia returned only ${wikiEvents.length} events (minimum ${minimumEventCount} required to avoid partial replace)`
+      );
+    } else {
+      failures.push("Wikipedia returned no parseable races");
+    }
   } else {
     failures.push(`Wikipedia${wikiResponse.statusCode ? ` ${wikiResponse.statusCode}` : " unavailable"}`);
   }
@@ -675,7 +683,7 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
     (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
   );
 
-  if (deduped.length > 0) {
+  if (deduped.length >= minimumEventCount) {
     return {
       events: deduped,
       status: `ProCyclingStats: loaded ${deduped.length} WorldTour races`,
@@ -683,7 +691,13 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
     };
   }
 
-  const fallback = getCanonicalCyclingEvents();
+  if (deduped.length > 0) {
+    failures.push(
+      `ProCyclingStats returned only ${deduped.length} events (minimum ${minimumEventCount} required to avoid partial replace)`
+    );
+  }
+
+  const fallback = canonicalCycling;
   return {
     events: fallback.events,
     status:

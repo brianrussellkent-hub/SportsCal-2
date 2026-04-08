@@ -78,6 +78,12 @@ function replaceScope(
   return [...merged.filter((event) => !scope.include(event)), ...replacement];
 }
 
+function withSequentialIds(events: SportsEvent[], prefix: string): SportsEvent[] {
+  return [...events]
+    .sort((a, b) => new Date(a.startTimeIso).getTime() - new Date(b.startTimeIso).getTime())
+    .map((event, index) => ({ ...event, id: `${prefix}-${index + 1}` }));
+}
+
 
 type JsonFetchResult<T> = {
   ok: boolean;
@@ -200,18 +206,20 @@ async function fetchGiantsFromEspn(): Promise<AdapterResult> {
   });
 
   if (teamSchedule.ok && events.length > 0) {
+    const stableEvents = withSequentialIds(events, "giants");
     return {
-      events,
-      status: `ESPN NFL team schedule: loaded ${events.length} Giants games`,
+      events: stableEvents,
+      status: `ESPN NFL team schedule: loaded ${stableEvents.length} Giants games`,
       ok: true
     };
   }
 
   const weeklyScoreboardEvents = await fetchGiantsFromWeeklyScoreboard();
   if (weeklyScoreboardEvents.length > 0) {
+    const stableEvents = withSequentialIds(weeklyScoreboardEvents, "giants");
     return {
-      events: weeklyScoreboardEvents,
-      status: `ESPN NFL weekly scoreboard fallback: loaded ${weeklyScoreboardEvents.length} Giants games`,
+      events: stableEvents,
+      status: `ESPN NFL weekly scoreboard fallback: loaded ${stableEvents.length} Giants games`,
       ok: true
     };
   }
@@ -311,9 +319,10 @@ async function fetchF1FromSources(): Promise<AdapterResult> {
     }));
 
     if (espnEvents.length > 0) {
+      const stableEvents = withSequentialIds(espnEvents, "f1");
       return {
-        events: espnEvents,
-        status: `ESPN F1: loaded ${espnEvents.length} races`,
+        events: stableEvents,
+        status: `ESPN F1: loaded ${stableEvents.length} races`,
         ok: true
       };
     }
@@ -337,7 +346,7 @@ async function fetchF1FromSources(): Promise<AdapterResult> {
     const events: SportsEvent[] = races.map((race, idx) => {
       const round = race.round ?? `${idx + 1}`;
       return {
-        id: `f1-ergast-${round}`,
+        id: `f1-${round}`,
         title: `Formula 1 ${race.raceName ?? `Round ${round}`}`,
         category: "Formula 1",
         teamOrSeries: "F1 World Championship",
@@ -407,7 +416,9 @@ function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
         ? `${dateMatch[1].slice(6)}-${dateMatch[1].slice(3, 5)}-${dateMatch[1].slice(0, 2)}`
         : dateMatch[1];
 
-    const raceMatch = row.match(/>([^<]*?(Tour|Volta|Itzulia|Paris|Giro|Classic|Championships)[^<]*?)<\/a>/i);
+    const raceMatch =
+      row.match(/<a[^>]+href="\/race\/[^"]+"[^>]*>([^<]+)<\/a>/i) ??
+      row.match(/<a[^>]*>([^<]{5,})<\/a>/i);
     if (!raceMatch) continue;
 
     const raceName = raceMatch[1].replace(/\s+/g, " ").trim();

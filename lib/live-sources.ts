@@ -106,7 +106,10 @@ async function fetchTextNoStore(url: string): Promise<TextFetchResult> {
     const res = await fetch(url, {
       cache: "no-store",
       headers: {
-        "user-agent": "SportsCal/2.0 (+https://example.local)"
+        "user-agent":
+          "Mozilla/5.0 (compatible; SportsCalBot/2.0; +https://sportscal.app)",
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.7"
       }
     });
     if (!res.ok) return { ok: false, statusCode: res.status };
@@ -466,7 +469,10 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
   const fallback = getCanonicalCyclingEvents();
   return {
     events: fallback.events,
-    status: `ProCyclingStats unavailable (${failures.join(", ") || "no response"}); using canonical cycling fallback (${fallback.events.length} events)`,
+    status:
+      failures.length > 0
+        ? `Cycling live sources unavailable (${failures.join(", ")}); keeping bundled WorldTour schedule (${fallback.events.length} events)`
+        : `Cycling live sources returned no parseable races; keeping bundled WorldTour schedule (${fallback.events.length} events)`,
     ok: true
   };
 }

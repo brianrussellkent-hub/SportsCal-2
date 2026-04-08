@@ -99,7 +99,8 @@ type TextFetchResult = {
 
 type MediaWikiParseResponse = {
   parse?: {
-    text?: string;
+    text?: string | { "*": string };
+    wikitext?: string | { "*": string };
   };
 };
 
@@ -407,17 +408,30 @@ function sanitizeRaceSlug(label: string): string {
 function monthNumber(monthLabel: string): string | null {
   const months: Record<string, string> = {
     january: "01",
+    jan: "01",
     february: "02",
+    feb: "02",
     march: "03",
+    mar: "03",
     april: "04",
+    apr: "04",
     may: "05",
     june: "06",
+    jun: "06",
     july: "07",
+    jul: "07",
     august: "08",
+    aug: "08",
     september: "09",
+    sep: "09",
+    sept: "09",
     october: "10",
+    oct: "10",
     november: "11",
+    nov: "11",
     december: "12"
+    ,
+    dec: "12"
   };
 
   return months[monthLabel.toLowerCase()] ?? null;
@@ -471,6 +485,49 @@ function parseCyclingRowsFromWikipediaHtml(html: string, year: string): SportsEv
   return events;
 }
 
+function parseCyclingRowsFromWikipediaWikitext(wikitext: string, year: string): SportsEvent[] {
+  const lines = wikitext.split("\n");
+  const events: SportsEvent[] = [];
+  const seenIds = new Set<string>();
+
+  for (const line of lines) {
+    const compact = line.replace(/\s+/g, " ").trim();
+    if (!compact.startsWith("|")) continue;
+
+    const match = compact.match(
+      /^\|\s*(?:\d+\s*\|\|\s*)?(?:\[\[)?([^\]|]+)(?:\|[^\]]+)?\]?\]?\s*\|\|\s*(\d{1,2}(?:\s*[–-]\s*\d{1,2})?\s+[A-Za-z]+)/
+    );
+    if (!match) continue;
+
+    const raceName = match[1].replace(/''/g, "").replace(/\{\{.*?\}\}/g, "").trim();
+    const startDate = normalizeCalendarDate(match[2], year);
+    if (!raceName || !startDate) continue;
+
+    const id = `uci-live-${startDate}-${sanitizeRaceSlug(raceName)}`;
+    if (seenIds.has(id)) continue;
+    seenIds.add(id);
+
+    events.push({
+      id,
+      title: raceName,
+      category: "Cycling",
+      teamOrSeries: "UCI World Tour",
+      location: "TBD",
+      startTimeIso: `${startDate}T12:00:00Z`,
+      source: "Wikipedia UCI World Tour calendar",
+      isTimeTbd: true
+    });
+  }
+
+  return events;
+}
+
+function unwrapMediaWikiField(field?: string | { "*": string }): string {
+  if (!field) return "";
+  if (typeof field === "string") return field;
+  return field["*"] ?? "";
+}
+
 function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
   const rows = html.split(/<\/tr>/i);
   const events: SportsEvent[] = [];
@@ -519,13 +576,19 @@ function parseCyclingRowsFromHtml(html: string): SportsEvent[] {
 
 async function fetchCyclingFromSources(): Promise<AdapterResult> {
   const year = "2026";
+  const failures: string[] = [];
   const wikiUrl =
     `https://en.wikipedia.org/w/api.php?action=parse&page=${year}_UCI_World_Tour` +
-    "&prop=text&formatversion=2&format=json";
+    "&prop=text|wikitext&format=json";
   const wikiResponse = await fetchJsonNoStore<MediaWikiParseResponse>(wikiUrl);
 
-  if (wikiResponse.ok && wikiResponse.data?.parse?.text) {
-    const wikiEvents = dedupe(parseCyclingRowsFromWikipediaHtml(wikiResponse.data.parse.text, year)).filter(
+  if (wikiResponse.ok && wikiResponse.data?.parse) {
+    const wikiHtml = unwrapMediaWikiField(wikiResponse.data.parse.text);
+    const wikiWikitext = unwrapMediaWikiField(wikiResponse.data.parse.wikitext);
+    const wikiEvents = dedupe([
+      ...parseCyclingRowsFromWikipediaHtml(wikiHtml, year),
+      ...parseCyclingRowsFromWikipediaWikitext(wikiWikitext, year)
+    ]).filter(
       (event) => event.category === "Cycling" && event.teamOrSeries === "UCI World Tour"
     );
 
@@ -536,6 +599,9 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
         ok: true
       };
     }
+    failures.push("Wikipedia returned no parseable races");
+  } else {
+    failures.push(`Wikipedia${wikiResponse.statusCode ? ` ${wikiResponse.statusCode}` : " unavailable"}`);
   }
 
   const candidates = [
@@ -545,8 +611,6 @@ async function fetchCyclingFromSources(): Promise<AdapterResult> {
   ];
 
   const events: SportsEvent[] = [];
-  const failures: string[] = [];
-
   for (const url of candidates) {
     const response = await fetchTextNoStore(url);
     if (!response.ok || !response.data) {
